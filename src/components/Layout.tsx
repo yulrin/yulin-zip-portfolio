@@ -25,6 +25,7 @@ export function SiteHeader() {
         <nav className="hidden md:flex items-center gap-1">
           <NavLink to="/" label="Home" />
           <NavLink to="/works" label="Works" />
+          <NavLink to="/archive" label="Archive" />
           <NavLink to="/about" label="About" />
           <NavLink to="/contact" label="Contact" />
         </nav>
@@ -34,6 +35,7 @@ export function SiteHeader() {
         <nav className="flex items-center gap-1 px-4 py-2 whitespace-nowrap">
           <NavLink to="/" label="Home" />
           <NavLink to="/works" label="Works" />
+          <NavLink to="/archive" label="Archive" />
           <NavLink to="/about" label="About" />
           <NavLink to="/contact" label="Contact" />
         </nav>
