@@ -3,11 +3,22 @@ import sodeung from "@/assets/work-sodeung.jpg";
 import paris from "@/assets/work-paris.jpg";
 import dior from "@/assets/work-dior.jpg";
 
+export const CATEGORIES = [
+  "AI Brand Film",
+  "Music Video",
+  "Animation",
+  "Fashion Visual",
+  "Experimental",
+] as const;
+
+export type Category = (typeof CATEGORIES)[number];
+
 export type Work = {
   slug: string;
   title: string;
   subtitle?: string;
-  category: string;
+  category: Category;
+  categoryLabel: string;
   year: string;
   thumb: string;
   tags: string[];
@@ -24,7 +35,8 @@ export const works: Work[] = [
     slug: "midnight-railway-diner",
     title: "철길심야식당",
     subtitle: "Midnight Railway Diner",
-    category: "Short Film / AI Narrative",
+    category: "Experimental",
+    categoryLabel: "Short Film / AI Narrative",
     year: "2025",
     thumb: railway,
     tags: ["AI Film", "Storytelling", "Neon", "Korean"],
@@ -46,7 +58,8 @@ export const works: Work[] = [
     slug: "sodeung",
     title: "SODEUNG",
     subtitle: "소등 / Lights Out",
-    category: "Music Video / AI Editorial",
+    category: "Music Video",
+    categoryLabel: "Music Video / AI Editorial",
     year: "2025",
     thumb: sodeung,
     tags: ["Music Video", "Dreamcore", "Portrait", "Pastel"],
@@ -68,7 +81,8 @@ export const works: Work[] = [
     slug: "post-apocalypse-paris",
     title: "Post-Apocalypse Paris",
     subtitle: "Fashion Campaign Spec",
-    category: "Fashion Film / Spec Campaign",
+    category: "Fashion Visual",
+    categoryLabel: "Fashion Film / Spec Campaign",
     year: "2025",
     thumb: paris,
     tags: ["Fashion", "Spec", "Cinematic", "Editorial"],
@@ -90,7 +104,8 @@ export const works: Work[] = [
     slug: "dior-adidas",
     title: "Dior / Adidas",
     subtitle: "Brand Visual Project",
-    category: "Brand Collab / Visual System",
+    category: "AI Brand Film",
+    categoryLabel: "Brand Collab / Visual System",
     year: "2024",
     thumb: dior,
     tags: ["Brand", "Sportswear", "Luxury", "System"],
