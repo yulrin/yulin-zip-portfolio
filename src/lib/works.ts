@@ -3,11 +3,22 @@ import sodeung from "@/assets/work-sodeung.jpg";
 import paris from "@/assets/work-paris.jpg";
 import dior from "@/assets/work-dior.jpg";
 
+export const CATEGORIES = [
+  "AI Brand Film",
+  "Music Video",
+  "Animation",
+  "Fashion Visual",
+  "Experimental",
+] as const;
+
+export type Category = (typeof CATEGORIES)[number];
+
 export type Work = {
   slug: string;
   title: string;
   subtitle?: string;
-  category: string;
+  category: Category;
+  categoryLabel: string;
   year: string;
   thumb: string;
   tags: string[];
