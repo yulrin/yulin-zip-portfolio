@@ -294,7 +294,7 @@ function Home() {
             <div className="flex items-center gap-2 px-2 py-1 bg-gradient-to-b from-[oklch(0.95_0_0)] via-[oklch(0.82_0.01_250)] to-[oklch(0.6_0.01_250)] border-b-2 border-foreground">
               <span className="chrome-btn-pink !py-1 !px-3 text-xs">★ START</span>
               <div className="flex-1 flex items-center gap-1 overflow-x-auto">
-                {["README.txt", "user.bmp", "recent_files.exe", "process.exe", "about.txt", "contact.exe"].map((t) => (
+                {["README.txt", "SHOWREEL_2026.MP4", "recent_files.exe", "process.exe", "about.txt", "contact.exe"].map((t) => (
                   <span key={t} className="font-mono text-xs px-2 py-1 border-2 border-foreground bg-white rounded-sm whitespace-nowrap">
                     ▣ {t}
                   </span>
