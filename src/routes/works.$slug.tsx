@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { PageShell } from "@/components/Layout";
-import { getWork, works } from "@/lib/works";
+import { getWork, works, type Work } from "@/lib/works";
 
 export const Route = createFileRoute("/works/$slug")({
   head: ({ params }) => {
@@ -46,7 +46,7 @@ function Section({ n, label, children }: { n: string; label: string; children: R
 }
 
 function CaseStudy() {
-  const { work } = Route.useLoaderData();
+  const { work } = Route.useLoaderData() as { work: Work };
 
   const idx = works.findIndex((w) => w.slug === work.slug);
   const next = works[(idx + 1) % works.length];
