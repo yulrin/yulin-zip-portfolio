@@ -239,3 +239,85 @@
 @utility animate-marquee {
   animation: marquee 30s linear infinite;
 }
+
+/* ---------- Y2K window chrome ---------- */
+@utility win {
+  background: white;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: 4px 4px 0 var(--ink);
+  overflow: hidden;
+}
+@utility win-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .35rem .6rem;
+  background: linear-gradient(180deg, oklch(0.78 0.22 5) 0%, oklch(0.55 0.25 5) 50%, oklch(0.42 0.22 5) 100%);
+  color: white;
+  border-bottom: 2px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 oklch(0 0 0 / .4);
+}
+@utility win-bar-silver {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .35rem .6rem;
+  background: linear-gradient(180deg, oklch(0.96 0 0) 0%, oklch(0.82 0.01 250) 50%, oklch(0.62 0.01 250) 100%);
+  color: var(--ink);
+  border-bottom: 2px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+@utility win-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--ink);
+  background: white;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+@utility blink {
+  animation: blink 1s steps(2) infinite;
+}
+
+@utility folder-icon {
+  position: relative;
+  display: block;
+  width: 64px;
+  height: 50px;
+  background: linear-gradient(180deg, oklch(0.92 0.18 5) 0%, oklch(0.7 0.22 5) 100%);
+  border: 2px solid var(--ink);
+  border-radius: 4px 8px 4px 4px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.folder-icon::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: -2px;
+  width: 28px;
+  height: 10px;
+  background: linear-gradient(180deg, oklch(0.92 0.18 5) 0%, oklch(0.75 0.22 5) 100%);
+  border: 2px solid var(--ink);
+  border-bottom: none;
+  border-radius: 4px 8px 0 0;
+}
+
