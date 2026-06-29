@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Marquee, PageShell } from "@/components/Layout";
-import { works } from "@/lib/works";
+import { featuredWorks as works } from "@/lib/works";
 import chromeBg from "@/assets/chrome-bg.jpg";
 import portrait from "@/assets/yulin-portrait.jpg";
 
