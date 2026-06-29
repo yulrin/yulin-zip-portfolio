@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PageShell } from "@/components/Layout";
-import { featuredWorks as works, CATEGORIES } from "@/lib/works";
-import portrait from "@/assets/yulin-portrait.jpg";
+import { featuredWorks as works, works as allWorks, CATEGORIES } from "@/lib/works";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
