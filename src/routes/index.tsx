@@ -60,8 +60,38 @@ function Home() {
 
       <Marquee items={["YULIN.ZIP", "AI VIDEO", "BRAND FILM", "VISUAL STORY", "SEOUL", "★", "NOW BOOKING"]} />
 
+      {/* WHAT I MAKE */}
+      <section className="mx-auto max-w-7xl px-4 pt-20 pb-4">
+        <div className="sticker mb-3">⊹ CATEGORIES</div>
+        <h2 className="font-display text-4xl md:text-6xl">What I make</h2>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {[
+            { t: "AI Brand Film", d: "Anthem spots, launch films, brand storytelling." , i: "▶" },
+            { t: "Music Video", d: "Dream logic for indie artists & labels." , i: "♪" },
+            { t: "Animation", d: "Loop sets, motion ID, animated key art." , i: "✦" },
+            { t: "Fashion Visual", d: "Editorial film, lookbooks, spec campaigns." , i: "♥" },
+            { t: "Experimental", d: "Personal shorts & R&D — where the new looks happen." , i: "★" },
+          ].map((c, idx) => (
+            <Link
+              key={c.t}
+              to="/works"
+              className="panel p-4 hover:-translate-y-1 transition-transform block"
+              style={{ transform: `rotate(${(idx % 2 === 0 ? -0.5 : 0.5)}deg)` }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="grid h-8 w-8 place-items-center rounded-full border-2 border-foreground bg-primary text-white font-display">{c.i}</span>
+                <span className="font-mono uppercase text-xs text-muted-foreground">0{idx + 1}</span>
+              </div>
+              <div className="font-display text-xl leading-tight">{c.t}</div>
+              <p className="mt-1 font-body text-sm text-muted-foreground">{c.d}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* SELECTED WORKS */}
       <section className="mx-auto max-w-7xl px-4 py-20">
+
         <div className="flex items-end justify-between gap-4 mb-8 flex-wrap">
           <div>
             <div className="sticker mb-3">⊹ 01 / SELECTED WORKS</div>
