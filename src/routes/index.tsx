@@ -75,6 +75,180 @@ function useClock() {
   return t;
 }
 
+const SHOWREEL_CLIPS = [
+  { slug: "midnight-railway-diner", label: "철길심야식당", tag: "EXPERIMENTAL", t: "00:00" },
+  { slug: "sodeung",                label: "SODEUNG",      tag: "MUSIC VIDEO",  t: "00:32" },
+  { slug: "post-apocalypse-paris",  label: "POST-APOCALYPSE PARIS", tag: "FASHION", t: "01:08" },
+  { slug: "arcade-heart",           label: "ARCADE HEART", tag: "MUSIC VIDEO",  t: "01:44" },
+  { slug: "chrome-flora",           label: "CHROME FLORA", tag: "ANIMATION",    t: "02:21" },
+] as const;
+
+const SHOWREEL_TOTAL_SEC = 168; // 02:48
+
+function pad(n: number) { return n.toString().padStart(2, "0"); }
+function fmtTime(s: number) { return `${pad(Math.floor(s / 60))}:${pad(Math.floor(s % 60))}`; }
+
+function ShowreelPlayer() {
+  const clips = useMemo(() => {
+    return SHOWREEL_CLIPS.map((c) => {
+      const w = allWorks.find((x) => x.slug === c.slug);
+      return { ...c, thumb: w?.thumb ?? "", year: w?.year ?? "" };
+    });
+  }, []);
+  const [idx, setIdx] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (!playing) return;
+    const id = setInterval(() => {
+      setElapsed((e) => {
+        const next = e + 1;
+        if (next >= SHOWREEL_TOTAL_SEC) {
+          setIdx((i) => (i + 1) % clips.length);
+          return 0;
+        }
+        // advance idx based on timestamps
+        const tToSec = (t: string) => {
+          const [m, s] = t.split(":").map(Number);
+          return m * 60 + s;
+        };
+        const newIdx = clips.reduce((acc, c, i) => (tToSec(c.t) <= next ? i : acc), 0);
+        setIdx(newIdx);
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [playing, clips]);
+
+  const current = clips[idx];
+  const progress = (elapsed / SHOWREEL_TOTAL_SEC) * 100;
+
+  return (
+    <WindowFrame title="SHOWREEL_2026.MP4" variant="silver">
+      <div className="bg-foreground">
+        {/* Video area */}
+        <div className="relative aspect-square overflow-hidden">
+          {clips.map((c, i) => (
+            <img
+              key={c.slug}
+              src={c.thumb}
+              alt={c.label}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`}
+              loading={i === 0 ? "eager" : "lazy"}
+            />
+          ))}
+          {/* Scanline overlay */}
+          <div
+            className="pointer-events-none absolute inset-0 mix-blend-overlay opacity-40"
+            style={{ backgroundImage: "repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 1px, transparent 1px 3px)" }}
+            aria-hidden
+          />
+          {/* Top labels */}
+          <div className="absolute top-2 left-2 right-2 flex items-start justify-between gap-2">
+            <div className="sticker-pink text-xs">▶ NOW PLAYING</div>
+            <div className="sticker text-[10px]">● REC · HD</div>
+          </div>
+          {/* Center play button */}
+          <button
+            type="button"
+            onClick={() => setPlaying((p) => !p)}
+            aria-label={playing ? "Pause showreel" : "Play showreel"}
+            className="absolute inset-0 grid place-items-center group"
+          >
+            <span className="grid place-items-center w-16 h-16 rounded-full border-2 border-foreground bg-white/90 group-hover:bg-primary group-hover:text-primary-foreground transition-colors font-display text-2xl shadow-[2px_2px_0_var(--ink)]">
+              {playing ? "❚❚" : "▶"}
+            </span>
+          </button>
+          {/* Bottom title strip */}
+          <div className="absolute bottom-0 inset-x-0 bg-foreground/85 text-background px-3 py-2 font-mono text-xs flex items-center justify-between gap-2">
+            <span className="truncate"><span className="text-chrome-pink">▶</span> {current.label}</span>
+            <span className="opacity-70 shrink-0">{current.tag} · {current.year}</span>
+          </div>
+        </div>
+
+        {/* Transport / progress */}
+        <div className="bg-white px-3 py-2 border-t-2 border-foreground">
+          {/* Progress bar */}
+          <div
+            className="relative h-3 border-2 border-foreground bg-muted rounded-sm overflow-hidden cursor-pointer"
+            onClick={(e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              const pct = (e.clientX - r.left) / r.width;
+              setElapsed(Math.max(0, Math.min(SHOWREEL_TOTAL_SEC - 1, pct * SHOWREEL_TOTAL_SEC)));
+            }}
+          >
+            <div
+              className="h-full bg-gradient-to-r from-[oklch(0.75_0.18_350)] via-[oklch(0.65_0.22_350)] to-[oklch(0.5_0.2_340)]"
+              style={{ width: `${progress}%` }}
+            />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 border-2 border-foreground bg-white rounded-full shadow-[1px_1px_0_var(--ink)]"
+              style={{ left: `calc(${progress}% - 6px)` }}
+              aria-hidden
+            />
+          </div>
+          {/* Timestamp + transport */}
+          <div className="mt-2 flex items-center justify-between font-mono text-xs">
+            <span>{fmtTime(elapsed)} / {fmtTime(SHOWREEL_TOTAL_SEC)}</span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => { setIdx((i) => (i - 1 + clips.length) % clips.length); setElapsed(0); }}
+                className="px-2 py-0.5 border-2 border-foreground bg-white hover:bg-muted rounded-sm"
+                aria-label="Previous chapter"
+              >◀◀</button>
+              <button
+                type="button"
+                onClick={() => setPlaying((p) => !p)}
+                className="px-2 py-0.5 border-2 border-foreground bg-white hover:bg-muted rounded-sm"
+                aria-label={playing ? "Pause" : "Play"}
+              >{playing ? "❚❚" : "▶"}</button>
+              <button
+                type="button"
+                onClick={() => { setIdx((i) => (i + 1) % clips.length); setElapsed(0); }}
+                className="px-2 py-0.5 border-2 border-foreground bg-white hover:bg-muted rounded-sm"
+                aria-label="Next chapter"
+              >▶▶</button>
+              <span className="ml-1 opacity-60">VOL ▮▮▮▮▯</span>
+            </div>
+          </div>
+          {/* Chapter list */}
+          <ol className="mt-2 border-t border-foreground/20 pt-2 space-y-0.5">
+            {clips.map((c, i) => (
+              <li key={c.slug}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIdx(i);
+                    const [m, s] = c.t.split(":").map(Number);
+                    setElapsed(m * 60 + s);
+                  }}
+                  className={`w-full grid grid-cols-[auto_1fr_auto] items-center gap-2 px-1.5 py-1 font-mono text-[11px] rounded-sm text-left ${i === idx ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+                >
+                  <span className="opacity-70">{c.t}</span>
+                  <span className="truncate">{c.label}</span>
+                  <span className="opacity-70">{c.tag}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </div>
+        {/* Footer status */}
+        <div className="px-3 py-1 border-t-2 border-foreground bg-muted font-mono text-xs flex justify-between items-center">
+          <span>SHOWREEL_2026.MP4</span>
+          <span className="opacity-70">H.264 · 1920×1080 · 24fps</span>
+        </div>
+      </div>
+      <div className="px-3 py-1 border-t-2 border-foreground bg-white font-mono text-xs flex justify-between">
+        <Link to="/works" className="underline underline-offset-2 hover:text-primary">▶ open /works</Link>
+        <span className="opacity-60">48.2 MB</span>
+      </div>
+    </WindowFrame>
+  );
+}
+
+
 function Home() {
   const clock = useClock();
 
