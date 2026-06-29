@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Marquee, PageShell } from "@/components/Layout";
-import { featuredWorks as works } from "@/lib/works";
-import chromeBg from "@/assets/chrome-bg.jpg";
+import { useEffect, useState } from "react";
+import { PageShell } from "@/components/Layout";
+import { featuredWorks as works, CATEGORIES } from "@/lib/works";
 import portrait from "@/assets/yulin-portrait.jpg";
 
 export const Route = createFileRoute("/")({
@@ -16,197 +16,312 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
+function WindowFrame({
+  title,
+  variant = "pink",
+  className = "",
+  children,
+  status,
+}: {
+  title: string;
+  variant?: "pink" | "silver";
+  className?: string;
+  children: React.ReactNode;
+  status?: string;
+}) {
+  return (
+    <div className={`win ${className}`}>
+      <div className={variant === "pink" ? "win-bar" : "win-bar-silver"}>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="win-dot">▣</span>
+          <span className="truncate">{title}</span>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <span className="win-dot">_</span>
+          <span className="win-dot">▢</span>
+          <span className="win-dot">×</span>
+        </div>
+      </div>
+      {children}
+      {status && (
+        <div className="px-3 py-1 border-t-2 border-foreground bg-muted font-mono text-sm flex items-center justify-between">
+          <span>{status}</span>
+          <span className="blink">▮</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const CATEGORY_META: Record<string, { icon: string; size: string }> = {
+  "AI Brand Film": { icon: "▶", size: "12 items" },
+  "Music Video":   { icon: "♪", size: "08 items" },
+  "Animation":     { icon: "✦", size: "06 items" },
+  "Fashion Visual":{ icon: "♥", size: "09 items" },
+  "Experimental":  { icon: "★", size: "05 items" },
+};
+
+function useClock() {
+  const [t, setT] = useState("--:--:--");
+  useEffect(() => {
+    const tick = () => {
+      const d = new Date();
+      setT(d.toTimeString().slice(0, 8));
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return t;
+}
+
 function Home() {
+  const clock = useClock();
+
   return (
     <PageShell>
-      {/* HERO */}
-      <section className="relative overflow-hidden border-b-2 border-foreground">
-        <div className="absolute inset-0 -z-10 opacity-30" style={{ backgroundImage: `url(${chromeBg})`, backgroundSize: "cover", backgroundPosition: "center" }} />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background/40 via-background/60 to-background" />
-
-        <div className="mx-auto max-w-7xl px-4 py-16 md:py-24 grid md:grid-cols-12 gap-8 items-center">
-          <div className="md:col-span-8">
-            <div className="flex flex-wrap items-center gap-2 mb-6">
-              <span className="sticker-pink">★ NOW BOOKING 2026</span>
-              <span className="sticker">♥ Seoul / Remote</span>
-              <span className="sticker">VOL.01</span>
-            </div>
-            <h1 className="font-display text-[18vw] md:text-[10rem] leading-[0.85] tracking-tight">
-              <span className="text-chrome-pink block">YULIN</span>
-              <span className="text-chrome block">.zip</span>
-            </h1>
-            <p className="mt-6 font-display text-2xl md:text-4xl">AI VIDEO CREATOR</p>
-            <p className="mt-2 font-mono text-xl md:text-2xl text-muted-foreground">
-              Brand Film <span className="text-primary">/</span> AI Video <span className="text-primary">/</span> Visual Storytelling
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/works" className="chrome-btn-pink">▶ Watch Selected Works</Link>
-              <Link to="/contact" className="chrome-btn">✦ Start a Project</Link>
-            </div>
-          </div>
-
-          <div className="md:col-span-4 relative">
-            <div className="relative panel overflow-hidden rotate-2">
-              <span className="tape -top-2 left-6 -rotate-6" />
-              <img src={portrait} alt="Portrait of YULIN" width={800} height={800} className="w-full aspect-square object-cover" />
-              <div className="absolute bottom-3 left-3 sticker-pink">@YULIN.zip</div>
-            </div>
-            <div className="absolute -top-6 -right-4 grid h-24 w-24 place-items-center rounded-full border-2 border-foreground bg-primary text-white font-display text-center text-sm leading-tight animate-spin-slow shadow-[2px_2px_0_var(--ink)]">
-              NEW<br />REEL<br />★ 2026
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <Marquee items={["YULIN.ZIP", "AI VIDEO", "BRAND FILM", "VISUAL STORY", "SEOUL", "★", "NOW BOOKING"]} />
-
-      {/* WHAT I MAKE */}
-      <section className="mx-auto max-w-7xl px-4 pt-20 pb-4">
-        <div className="sticker mb-3">⊹ CATEGORIES</div>
-        <h2 className="font-display text-4xl md:text-6xl">What I make</h2>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {[
-            { t: "AI Brand Film", d: "Anthem spots, launch films, brand storytelling." , i: "▶" },
-            { t: "Music Video", d: "Dream logic for indie artists & labels." , i: "♪" },
-            { t: "Animation", d: "Loop sets, motion ID, animated key art." , i: "✦" },
-            { t: "Fashion Visual", d: "Editorial film, lookbooks, spec campaigns." , i: "♥" },
-            { t: "Experimental", d: "Personal shorts & R&D — where the new looks happen." , i: "★" },
-          ].map((c, idx) => (
-            <Link
-              key={c.t}
-              to="/works"
-              className="panel p-4 hover:-translate-y-1 transition-transform block"
-              style={{ transform: `rotate(${(idx % 2 === 0 ? -0.5 : 0.5)}deg)` }}
+      {/* ============ DESKTOP ============ */}
+      <div
+        className="relative"
+        style={{
+          backgroundImage:
+            "radial-gradient(oklch(1 0 0 / .5) 1px, transparent 1.5px), linear-gradient(135deg, oklch(0.85 0.12 350) 0%, oklch(0.82 0.05 250) 50%, oklch(0.88 0.08 200) 100%)",
+          backgroundSize: "18px 18px, cover",
+        }}
+      >
+        <div className="mx-auto max-w-7xl px-3 md:px-6 py-6 md:py-10 space-y-5 md:space-y-6">
+          {/* ===== TOP ROW: README + PORTRAIT ===== */}
+          <div className="grid gap-5 md:gap-6 lg:grid-cols-12">
+            <WindowFrame
+              title="C:\YULIN.zip\README.txt"
+              className="lg:col-span-8"
+              status={`READY · ${clock} · 1 of 5 disks`}
             >
-              <div className="flex items-center gap-2 mb-2">
-                <span className="grid h-8 w-8 place-items-center rounded-full border-2 border-foreground bg-primary text-white font-display">{c.i}</span>
-                <span className="font-mono uppercase text-xs text-muted-foreground">0{idx + 1}</span>
+              <div className="bg-foreground text-background p-5 md:p-8 font-mono text-base md:text-lg leading-relaxed">
+                <div className="text-primary">{">"} extracting YULIN.zip ...</div>
+                <div className="opacity-70">{">"} 100% [████████████████████] OK</div>
+                <div className="mt-4">
+                  <span className="text-primary">$</span> cat README.txt
+                </div>
+                <div className="mt-3 space-y-2">
+                  <div>Welcome to <span className="text-primary">YULIN.zip</span> — the personal archive of an AI video director working between Seoul and the rest of the internet.</div>
+                  <div className="opacity-80">Open the folders below to browse brand films, music videos, animation, fashion visuals, and experiments.</div>
+                </div>
+                <div className="mt-6 font-display text-5xl md:text-7xl leading-[0.85]">
+                  <span className="text-chrome-pink block">YULIN</span>
+                  <span className="text-chrome block">.zip</span>
+                </div>
+                <div className="mt-4 font-display text-xl md:text-2xl text-background">AI VIDEO CREATOR · BRAND FILM · VISUAL STORY</div>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Link to="/works" className="chrome-btn-pink text-sm">▶ Open /works</Link>
+                  <Link to="/contact" className="chrome-btn text-sm">✉ Run contact.exe</Link>
+                </div>
+                <div className="mt-4 text-sm opacity-60">▮ press any key to continue_</div>
               </div>
-              <div className="font-display text-xl leading-tight">{c.t}</div>
-              <p className="mt-1 font-body text-sm text-muted-foreground">{c.d}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+            </WindowFrame>
 
-      {/* SELECTED WORKS */}
-      <section className="mx-auto max-w-7xl px-4 py-20">
+            <div className="lg:col-span-4 space-y-5">
+              <WindowFrame title="user.bmp" variant="silver">
+                <div className="relative">
+                  <img
+                    src={portrait}
+                    alt="Portrait of YULIN"
+                    width={800}
+                    height={800}
+                    className="w-full aspect-square object-cover"
+                  />
+                  <div className="absolute top-2 left-2 sticker-pink">@YULIN.zip</div>
+                  <div className="absolute bottom-2 right-2 sticker">★ ONLINE</div>
+                </div>
+                <div className="px-3 py-2 font-mono text-sm border-t-2 border-foreground bg-white flex justify-between">
+                  <span>user.bmp</span>
+                  <span className="opacity-60">1.2 MB</span>
+                </div>
+              </WindowFrame>
 
-        <div className="flex items-end justify-between gap-4 mb-8 flex-wrap">
-          <div>
-            <div className="sticker mb-3">⊹ 01 / SELECTED WORKS</div>
-            <h2 className="font-display text-5xl md:text-7xl">Selected <span className="text-chrome-pink">Works</span></h2>
+              <WindowFrame title="system.info" variant="silver">
+                <dl className="grid grid-cols-2 gap-x-3 gap-y-1 p-3 font-mono text-sm">
+                  <dt className="opacity-60">LOCATION</dt><dd>Seoul / Remote</dd>
+                  <dt className="opacity-60">STATUS</dt><dd className="text-primary">● Booking '26</dd>
+                  <dt className="opacity-60">VERSION</dt><dd>v6.2026</dd>
+                  <dt className="opacity-60">DISK</dt><dd>40+ projects</dd>
+                  <dt className="opacity-60">UPTIME</dt><dd>06 yrs</dd>
+                </dl>
+              </WindowFrame>
+            </div>
           </div>
-          <Link to="/works" className="chrome-btn text-sm">See all →</Link>
-        </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {works.map((w, i) => (
-            <Link
-              key={w.slug}
-              to="/works/$slug"
-              params={{ slug: w.slug }}
-              className="group relative panel overflow-hidden block transition-transform hover:-translate-y-1"
-              style={{ transform: `rotate(${i % 2 === 0 ? -0.6 : 0.6}deg)` }}
-            >
-              <div className="relative aspect-[4/3] overflow-hidden border-b-2 border-foreground bg-foreground">
-                <img src={w.thumb} alt={w.title} loading="lazy" width={1024} height={768} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                <span className="absolute top-3 left-3 sticker-pink">▶ Play Reel</span>
-                <span className="absolute top-3 right-3 sticker">{w.year}</span>
+          {/* ===== FOLDERS ===== */}
+          <WindowFrame title="C:\YULIN.zip\ — 5 folders">
+            <div className="bg-white p-4 md:p-6">
+              <div className="font-mono text-sm uppercase mb-4 flex items-center gap-2 text-muted-foreground">
+                <span>📁</span><span>My Categories</span> <span className="opacity-50">/ double-click to open</span>
               </div>
-              <div className="p-5">
-                <div className="font-mono text-sm uppercase text-muted-foreground">{w.category}</div>
-                <h3 className="font-display text-3xl mt-1">{w.title}</h3>
-                {w.subtitle && <div className="font-serif italic text-lg text-muted-foreground">{w.subtitle}</div>}
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {w.tags.map((t) => (
-                    <span key={t} className="font-mono text-sm px-2 py-0.5 border border-foreground rounded-full">#{t}</span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {CATEGORIES.map((c, i) => {
+                  const m = CATEGORY_META[c];
+                  return (
+                    <Link
+                      key={c}
+                      to="/works"
+                      className="group flex flex-col items-center text-center p-3 rounded-md border-2 border-transparent hover:border-foreground hover:bg-muted transition-colors"
+                      style={{ transform: `rotate(${(i % 2 === 0 ? -0.5 : 0.5)}deg)` }}
+                    >
+                      <div className="folder-icon group-hover:-translate-y-1 transition-transform" aria-hidden>
+                        <span className="absolute inset-0 grid place-items-center font-display text-2xl text-white drop-shadow-[1px_1px_0_var(--ink)]">
+                          {m.icon}
+                        </span>
+                      </div>
+                      <div className="mt-3 font-display text-base leading-tight">{c}</div>
+                      <div className="font-mono text-xs opacity-60">{m.size}</div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </WindowFrame>
+
+          {/* ===== RECENT FILES (selected works) ===== */}
+          <WindowFrame
+            title="recent_files.exe — sorted by newest"
+            status={`${works.length} files · type: video/mp4 · view: details`}
+          >
+            <div className="bg-white">
+              {/* table header */}
+              <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-2 border-b-2 border-foreground bg-muted font-mono text-xs uppercase">
+                <div className="col-span-1">#</div>
+                <div className="col-span-5">Name</div>
+                <div className="col-span-3">Type</div>
+                <div className="col-span-1">Year</div>
+                <div className="col-span-2 text-right">Open</div>
+              </div>
+              <ul>
+                {works.map((w, i) => (
+                  <li key={w.slug} className="border-b border-foreground/20 last:border-b-0">
+                    <Link
+                      to="/works/$slug"
+                      params={{ slug: w.slug }}
+                      className="group grid grid-cols-12 gap-3 items-center px-3 md:px-4 py-3 hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      <div className="col-span-2 md:col-span-1">
+                        <div className="relative w-14 h-14 md:w-12 md:h-12 border-2 border-foreground overflow-hidden rounded-sm bg-foreground">
+                          <img src={w.thumb} alt="" className="w-full h-full object-cover" loading="lazy" />
+                        </div>
+                      </div>
+                      <div className="col-span-10 md:col-span-5 min-w-0">
+                        <div className="font-display text-xl leading-none truncate">{w.title}</div>
+                        <div className="font-mono text-xs opacity-70 truncate">
+                          {w.slug}.mp4
+                          {w.duration ? ` · ${w.duration}` : ""}
+                        </div>
+                      </div>
+                      <div className="col-span-7 md:col-span-3 font-mono text-sm">
+                        <span className="sticker-pink text-xs">{w.category}</span>
+                      </div>
+                      <div className="col-span-2 md:col-span-1 font-mono text-sm">{w.year}</div>
+                      <div className="col-span-3 md:col-span-2 text-right font-mono text-sm">
+                        <span className="inline-flex items-center gap-1 group-hover:text-primary-foreground">▶ open →</span>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div className="px-4 py-3 border-t-2 border-foreground bg-muted flex justify-between items-center">
+                <span className="font-mono text-sm opacity-70">View all archived files</span>
+                <Link to="/works" className="chrome-btn-pink text-xs">▶ /works</Link>
+              </div>
+            </div>
+          </WindowFrame>
+
+          {/* ===== PROCESS + ABOUT ===== */}
+          <div className="grid gap-5 md:gap-6 lg:grid-cols-12">
+            <WindowFrame title="process.exe — how files get made" className="lg:col-span-7">
+              <div className="bg-white p-4 md:p-6">
+                <div className="font-mono text-sm uppercase text-muted-foreground mb-3">Pipeline · 04 stages</div>
+                <ol className="space-y-3">
+                  {[
+                    { n: "01", t: "Brief & Mood", d: "Treatment, references, written intent." },
+                    { n: "02", t: "Pre-Viz", d: "Stills, style locks, character LoRAs." },
+                    { n: "03", t: "Generate & Direct", d: "Runway, Kling, ComfyUI — per shot, not per habit." },
+                    { n: "04", t: "Post & Finish", d: "Grade, sound design, finishing pass." },
+                  ].map((s) => (
+                    <li key={s.n} className="flex gap-4 items-start border-2 border-foreground rounded-md p-3 bg-muted">
+                      <div className="font-display text-3xl text-primary leading-none">{s.n}</div>
+                      <div className="min-w-0">
+                        <div className="font-display text-lg leading-tight">{s.t}</div>
+                        <div className="font-mono text-sm opacity-70">{s.d}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </WindowFrame>
+
+            <WindowFrame title="about.txt" variant="silver" className="lg:col-span-5">
+              <div className="bg-white p-4 md:p-6">
+                <div className="sticker mb-3">⊹ NOTEPAD.EXE</div>
+                <h2 className="font-display text-3xl md:text-4xl">Hi, I'm <span className="text-chrome-pink">YULIN</span></h2>
+                <p className="mt-3 font-body text-base leading-relaxed">
+                  Editor turned AI director. I make brand films, music videos, and speculative
+                  campaigns with generative tools — directed with the rigor of a traditional set.
+                </p>
+                <div className="mt-4 grid grid-cols-2 gap-3 font-mono text-sm">
+                  {[
+                    { k: "PROJECTS", v: "40+" },
+                    { k: "YEARS", v: "06" },
+                    { k: "BRANDS", v: "12" },
+                    { k: "COFFEES", v: "∞" },
+                  ].map((s) => (
+                    <div key={s.k} className="border-2 border-foreground rounded-md p-2 bg-muted">
+                      <div className="font-display text-2xl text-chrome-pink leading-none">{s.v}</div>
+                      <div className="text-xs uppercase opacity-70 mt-1">{s.k}</div>
+                    </div>
                   ))}
                 </div>
-                <div className="mt-4 inline-flex items-center gap-1 font-mono uppercase text-sm group-hover:text-primary">
-                  View case study →
-                </div>
+                <Link to="/about" className="chrome-btn mt-5 text-sm">Open about.txt →</Link>
               </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+            </WindowFrame>
+          </div>
 
-      {/* PROCESS */}
-      <section className="border-y-2 border-foreground bg-foreground text-background">
-        <div className="mx-auto max-w-7xl px-4 py-20">
-          <div className="sticker-pink mb-3">⊹ 02 / CREATIVE PROCESS</div>
-          <h2 className="font-display text-5xl md:text-7xl text-background">How it gets made</h2>
-          <p className="mt-3 font-mono text-xl opacity-70 max-w-2xl">
-            I treat AI like a film crew — not a vending machine. Every piece moves through four stages.
-          </p>
-
-          <div className="mt-12 grid gap-6 md:grid-cols-4">
-            {[
-              { n: "01", t: "Brief & Mood", d: "Treatment, references, written intent. The hardest part — and the part most people skip." },
-              { n: "02", t: "Pre-Viz", d: "Stills, style locks, character LoRAs. Establish the visual grammar before any frame moves." },
-              { n: "03", t: "Generate & Direct", d: "Runway, Kling, ComfyUI — chosen per shot, not per habit. I direct, the models render." },
-              { n: "04", t: "Post & Finish", d: "Grade, sound design, finishing pass. The 20% that makes it feel commissioned." },
-            ].map((s) => (
-              <div key={s.n} className="relative panel bg-background text-foreground p-5">
-                <div className="font-display text-5xl text-primary">{s.n}</div>
-                <h3 className="font-display text-2xl mt-2">{s.t}</h3>
-                <p className="font-body text-base mt-2 text-muted-foreground">{s.d}</p>
+          {/* ===== CONTACT DIALOG ===== */}
+          <WindowFrame title="contact.exe — new message" variant="pink">
+            <div className="bg-white p-5 md:p-10 text-center">
+              <div className="sticker-pink mx-auto mb-3">⊹ DIALOG</div>
+              <h2 className="font-display text-4xl md:text-6xl leading-[0.95]">
+                Got an idea? <br /><span className="text-chrome-pink">Let's ship it.</span>
+              </h2>
+              <p className="mt-3 font-mono text-base md:text-lg text-muted-foreground">
+                Currently booking brand films &amp; campaigns for Spring 2026.
+              </p>
+              <div className="mt-5 flex flex-wrap justify-center gap-3">
+                <a href="mailto:hello@yulin.zip" className="chrome-btn-pink">✉ hello@yulin.zip</a>
+                <Link to="/contact" className="chrome-btn">[ OK ] open form</Link>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ABOUT TEASER */}
-      <section className="mx-auto max-w-7xl px-4 py-20 grid md:grid-cols-2 gap-10 items-center">
-        <div>
-          <div className="sticker mb-3">⊹ 03 / ABOUT</div>
-          <h2 className="font-display text-5xl md:text-7xl">Hi, I'm <span className="text-chrome-pink">YULIN</span></h2>
-          <p className="mt-4 font-body text-lg leading-relaxed">
-            I'm an AI video creator working between Seoul and the rest of the internet.
-            I build brand films, music videos, and speculative campaigns using generative tools
-            — directed with the same rigor as a traditional production.
-          </p>
-          <p className="mt-3 font-body text-lg leading-relaxed text-muted-foreground">
-            My background is in film editing. My present is in prompts, LoRAs, and
-            color science. My obsession is making AI work that feels made, not generated.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link to="/about" className="chrome-btn">More about me →</Link>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          {[
-            { k: "Projects shipped", v: "40+" },
-            { k: "Years in motion", v: "06" },
-            { k: "Brands worked with", v: "12" },
-            { k: "Coffees per edit", v: "∞" },
-          ].map((s) => (
-            <div key={s.k} className="panel p-5">
-              <div className="font-display text-5xl text-chrome-pink">{s.v}</div>
-              <div className="font-mono uppercase text-sm mt-1">{s.k}</div>
             </div>
-          ))}
-        </div>
-      </section>
+            <div className="px-3 py-1 border-t-2 border-foreground bg-muted font-mono text-sm flex justify-between">
+              <span>reply within 24h</span>
+              <span className="blink">▮</span>
+            </div>
+          </WindowFrame>
 
-      {/* CONTACT TEASER */}
-      <section className="mx-auto max-w-7xl px-4 pb-20">
-        <div className="relative panel p-10 md:p-16 text-center overflow-hidden">
-          <span className="tape -top-2 left-10 -rotate-3" />
-          <span className="tape -top-2 right-10 rotate-6" />
-          <div className="sticker-pink mx-auto mb-4">⊹ 04 / CONTACT</div>
-          <h2 className="font-display text-5xl md:text-8xl leading-none">
-            Got an idea? <br /><span className="text-chrome-pink">Let's ship it.</span>
-          </h2>
-          <p className="mt-4 font-mono text-xl text-muted-foreground">Currently booking brand films &amp; campaigns for Spring 2026.</p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <a href="mailto:hello@yulin.zip" className="chrome-btn-pink">✉ hello@yulin.zip</a>
-            <Link to="/contact" className="chrome-btn">Open contact form →</Link>
+          {/* ===== TASKBAR ===== */}
+          <div className="win">
+            <div className="flex items-center gap-2 px-2 py-1 bg-gradient-to-b from-[oklch(0.95_0_0)] via-[oklch(0.82_0.01_250)] to-[oklch(0.6_0.01_250)] border-b-2 border-foreground">
+              <span className="chrome-btn-pink !py-1 !px-3 text-xs">★ START</span>
+              <div className="flex-1 flex items-center gap-1 overflow-x-auto">
+                {["README.txt", "user.bmp", "recent_files.exe", "process.exe", "about.txt", "contact.exe"].map((t) => (
+                  <span key={t} className="font-mono text-xs px-2 py-1 border-2 border-foreground bg-white rounded-sm whitespace-nowrap">
+                    ▣ {t}
+                  </span>
+                ))}
+              </div>
+              <span className="font-mono text-xs px-2 py-1 border-2 border-foreground bg-white rounded-sm whitespace-nowrap">
+                🕒 {clock}
+              </span>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
     </PageShell>
   );
 }
