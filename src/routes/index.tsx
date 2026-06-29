@@ -121,23 +121,8 @@ function Home() {
             </WindowFrame>
 
             <div className="lg:col-span-4 space-y-5">
-              <WindowFrame title="user.bmp" variant="silver">
-                <div className="relative">
-                  <img
-                    src={portrait}
-                    alt="Portrait of YULIN"
-                    width={800}
-                    height={800}
-                    className="w-full aspect-square object-cover"
-                  />
-                  <div className="absolute top-2 left-2 sticker-pink">@YULIN.zip</div>
-                  <div className="absolute bottom-2 right-2 sticker">★ ONLINE</div>
-                </div>
-                <div className="px-3 py-2 font-mono text-sm border-t-2 border-foreground bg-white flex justify-between">
-                  <span>user.bmp</span>
-                  <span className="opacity-60">1.2 MB</span>
-                </div>
-              </WindowFrame>
+              <ShowreelPlayer />
+
 
               <WindowFrame title="system.info" variant="silver">
                 <dl className="grid grid-cols-2 gap-x-3 gap-y-1 p-3 font-mono text-sm">
