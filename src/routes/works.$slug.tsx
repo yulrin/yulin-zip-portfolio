@@ -1,12 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { PageShell } from "@/components/Layout";
-import { getWork, works, type Work } from "@/lib/works";
+import { CATEGORY_LABELS, getWork, works, type Work } from "@/lib/works";
 
 export const Route = createFileRoute("/works/$slug")({
   head: ({ params }) => {
     const w = getWork(params.slug);
-    const title = w ? `${w.title} — Case Study · YULIN.zip` : "Case Study — YULIN.zip";
-    const desc = w?.concept ?? "AI video case study by YULIN.";
+    const title = w ? `${w.title} — 프로젝트 상세 · YULIN.zip` : "프로젝트 상세 — YULIN.zip";
+    const desc = w?.concept ?? "YULIN의 AI 영상 프로젝트 상세 페이지입니다.";
     return {
       meta: [
         { title },
@@ -26,8 +26,10 @@ export const Route = createFileRoute("/works/$slug")({
   notFoundComponent: () => (
     <PageShell>
       <div className="mx-auto max-w-3xl px-4 py-32 text-center">
-        <h1 className="font-display text-6xl">404 / Case not found</h1>
-        <Link to="/works" className="chrome-btn mt-6">← Back to works</Link>
+        <h1 className="font-display text-5xl md:text-6xl">404 / 프로젝트를 찾을 수 없습니다</h1>
+        <Link to="/works" className="chrome-btn mt-6">
+          ← 프로젝트로 돌아가기
+        </Link>
       </div>
     </PageShell>
   ),
@@ -53,76 +55,103 @@ function CaseStudy() {
 
   return (
     <PageShell>
-      <article className="mx-auto max-w-5xl px-4 py-12">
-        <Link to="/works" className="font-mono uppercase text-sm hover:text-primary">← All Works</Link>
+      <article className="mx-auto max-w-5xl px-4 py-8 md:py-12">
+        <Link to="/works" className="font-mono text-sm hover:text-primary">
+          ← 전체 프로젝트
+        </Link>
 
-        <header className="mt-6">
+        <header className="case-study-header mt-6">
+          <div className="case-study-kicker" aria-label="케이스 스터디 정보">
+            <span>CASE STUDY</span>
+            <span className="case-study-barcode" aria-hidden="true" />
+            <span>PROJECT {String(idx + 1).padStart(2, "0")}</span>
+            <span className="text-primary">YULIN.zip ✦</span>
+          </div>
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            <span className="sticker-pink">▶ {work.category}</span>
+            <span className="sticker-pink">▶ {CATEGORY_LABELS[work.category]}</span>
             <span className="sticker">{work.year}</span>
           </div>
-          <h1 className="font-display text-5xl md:text-8xl leading-[0.9]">{work.title}</h1>
+          <h1 className="font-display text-4xl sm:text-5xl md:text-8xl leading-[1]">
+            {work.title}
+          </h1>
           {work.subtitle && (
-            <p className="font-serif italic text-2xl text-muted-foreground mt-2">{work.subtitle}</p>
+            <p className="font-body font-bold text-xl md:text-2xl text-muted-foreground mt-3">
+              {work.subtitle}
+            </p>
           )}
         </header>
 
-        <div className="relative mt-8 panel overflow-hidden">
+        <div className="case-study-media relative mt-8 panel overflow-hidden">
           <span className="tape -top-2 left-10 -rotate-3" />
           <span className="tape -top-2 right-10 rotate-3" />
-          <div className="relative aspect-video bg-foreground">
-            <img src={work.thumb} alt={work.title} width={1920} height={1080} className="w-full h-full object-cover" />
-            <button className="absolute inset-0 grid place-items-center">
-              <span className="grid h-24 w-24 place-items-center rounded-full border-4 border-foreground bg-primary text-white font-display text-3xl shadow-[4px_4px_0_var(--ink)] transition-transform hover:scale-110">▶</span>
-            </button>
+          <div className="group relative aspect-video bg-foreground overflow-hidden">
+            <img
+              src={work.thumb}
+              alt={`${work.title} 프로젝트 대표 이미지`}
+              width={1920}
+              height={1080}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+            />
+            <span className="absolute bottom-3 left-3 sticker-pink">★ 대표 이미지</span>
           </div>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
           {work.tags.map((t) => (
-            <span key={t} className="font-mono text-sm px-2 py-0.5 border-2 border-foreground rounded-full bg-white">#{t}</span>
+            <span
+              key={t}
+              className="font-mono text-sm px-2 py-0.5 border-2 border-foreground rounded-full bg-white"
+            >
+              #{t}
+            </span>
           ))}
         </div>
 
-        <Section n="01" label="Concept">
+        <Section n="01" label="기획 의도">
           <p>{work.concept}</p>
         </Section>
 
-        <Section n="02" label="Role">
+        <Section n="02" label="담당 역할">
           <p>{work.role}</p>
         </Section>
 
-        <Section n="03" label="Tools">
+        <Section n="03" label="사용 도구">
           <ul className="flex flex-wrap gap-2">
             {work.tools.map((t) => (
-              <li key={t} className="sticker">{t}</li>
+              <li key={t} className="sticker">
+                {t}
+              </li>
             ))}
           </ul>
         </Section>
 
-        <Section n="04" label="Process">
+        <Section n="04" label="제작 과정">
           <ol className="space-y-3">
             {work.process.map((p, i) => (
               <li key={i} className="flex gap-4">
-                <span className="font-display text-2xl text-chrome-pink shrink-0 w-8">{String(i + 1).padStart(2, "0")}</span>
+                <span className="font-display text-2xl text-chrome-pink shrink-0 w-8">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 <span>{p}</span>
               </li>
             ))}
           </ol>
         </Section>
 
-        <Section n="05" label="Final Output">
+        <Section n="05" label="결과">
           <p>{work.output}</p>
         </Section>
 
-        <Section n="06" label="What I Improved">
+        <Section n="06" label="배운 점과 개선">
           <p className="border-l-4 border-primary pl-4 italic">{work.improved}</p>
         </Section>
 
         <div className="border-t-2 border-foreground mt-10 pt-10 flex items-center justify-between gap-4 flex-wrap">
-          <Link to="/works" className="chrome-btn">← All Works</Link>
+          <Link to="/works" className="chrome-btn">
+            ← 전체 프로젝트
+          </Link>
           <Link to="/works/$slug" params={{ slug: next.slug }} className="chrome-btn-pink">
-            Next: {next.title} →
+            다음 프로젝트: {next.title} →
           </Link>
         </div>
       </article>
