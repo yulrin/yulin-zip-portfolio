@@ -1,176 +1,153 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { PageShell, Marquee } from "@/components/Layout";
-import { works } from "@/lib/works";
+import { PageShell } from "@/components/Layout";
+import { CATEGORIES, CATEGORY_LABELS, works, type Category } from "@/lib/works";
 
 export const Route = createFileRoute("/archive")({
   head: () => ({
     meta: [
-      { title: "Archive — YULIN.zip" },
-      { name: "description", content: "Full archive of YULIN's AI video work, brand films, music videos, and spec campaigns." },
-      { property: "og:title", content: "Archive — YULIN.zip" },
-      { property: "og:description", content: "Every project, indexed. Filter by year, type, or tag." },
+      { title: "아카이브 — YULIN.zip" },
+      {
+        name: "description",
+        content: "YULIN의 AI 영상, 브랜드 필름, 뮤직비디오와 실험 작업을 모은 아카이브입니다.",
+      },
+      { property: "og:title", content: "아카이브 — YULIN.zip" },
+      { property: "og:description", content: "YULIN_FEED.exe에서 탐색하는 전체 프로젝트 기록." },
     ],
   }),
   component: ArchivePage,
 });
 
-// Extra catalog entries — older / smaller works to make the archive feel real.
-const extras = [
-  { slug: "neon-bath", title: "NEON BATH", category: "Music Video", year: "2024", tags: ["Music Video", "Neon"], role: "Director / Edit" },
-  { slug: "kintsugi-loop", title: "KINTSUGI LOOP", category: "Loop Series", year: "2024", tags: ["Loop", "Texture"], role: "AI Visualist" },
-  { slug: "seoul-2099", title: "SEOUL 2099", category: "Spec / City Film", year: "2024", tags: ["Spec", "Sci-Fi"], role: "Director" },
-  { slug: "ssg-summer", title: "SSG // SUMMER", category: "Brand Spot", year: "2023", tags: ["Brand", "Retail"], role: "AI Visualist" },
-  { slug: "ghost-channel", title: "GHOST CHANNEL", category: "Personal Short", year: "2023", tags: ["Short", "Horror"], role: "Director / Edit" },
-  { slug: "pearl-rain", title: "PEARL RAIN", category: "Lookbook", year: "2023", tags: ["Fashion", "Editorial"], role: "AI Stylist" },
-  { slug: "kkang-tour", title: "KKANG TOUR", category: "Tour Visuals", year: "2022", tags: ["Live", "Loop"], role: "VJ / Visuals" },
-  { slug: "rooftop-vhs", title: "ROOFTOP VHS", category: "Personal", year: "2022", tags: ["Found", "Lo-fi"], role: "Editor" },
-];
-
-type Entry = {
-  slug: string;
-  title: string;
-  category: string;
-  year: string;
-  tags: string[];
-  role: string;
-  hasCase: boolean;
-};
-
-const catalog: Entry[] = [
-  ...works.map((w) => ({
-    slug: w.slug,
-    title: w.title,
-    category: w.category,
-    year: w.year,
-    tags: w.tags,
-    role: w.role.split("·")[0].trim(),
-    hasCase: true,
-  })),
-  ...extras.map((e) => ({ ...e, hasCase: false })),
-];
-
 function ArchivePage() {
-  const [year, setYear] = useState<string>("ALL");
-  const [tag, setTag] = useState<string>("ALL");
+  const [category, setCategory] = useState<Category | "ALL">("ALL");
 
-  const years = useMemo(() => ["ALL", ...Array.from(new Set(catalog.map((e) => e.year))).sort((a, b) => b.localeCompare(a))], []);
-  const tags = useMemo(() => ["ALL", ...Array.from(new Set(catalog.flatMap((e) => e.tags))).sort()], []);
-
-  const filtered = catalog.filter(
-    (e) => (year === "ALL" || e.year === year) && (tag === "ALL" || e.tags.includes(tag))
+  const filtered = useMemo(
+    () => works.filter((work) => category === "ALL" || work.category === category),
+    [category],
   );
 
   return (
     <PageShell>
-      <section className="mx-auto max-w-7xl px-4 py-16">
-        <div className="flex flex-wrap items-center gap-2 mb-4">
-          <span className="sticker">⊹ INDEX.txt</span>
-          <span className="sticker-pink">★ {catalog.length} ENTRIES</span>
-          <span className="sticker">SINCE 2022</span>
-        </div>
-        <h1 className="font-display text-6xl md:text-9xl leading-[0.9]">
-          <span className="text-chrome">THE</span><br />
-          <span className="text-chrome-pink">ARCHIVE</span>
-        </h1>
-        <p className="mt-4 font-mono text-xl text-muted-foreground max-w-2xl">
-          Everything I've shipped, scribbled, or shelved. Filter by year or tag.
-          Full case studies live on the marked entries.
-        </p>
-      </section>
+      <section className="archive-feed-shell mx-auto max-w-6xl px-4 py-10 md:py-16">
+        <div className="archive-feed-window">
+          <div className="archive-feed-titlebar">
+            <div>
+              <span aria-hidden="true">▣</span>
+              <span>YULIN_FEED.exe</span>
+            </div>
+            <span aria-hidden="true">_ □ ×</span>
+          </div>
 
-      <Marquee items={["★ FULL CATALOG", "VOL.01 → VOL.04", "ALL YEARS", "ALL TAGS", "♥"]} />
+          <div className="archive-feed-menu" aria-hidden="true">
+            <span>파일</span>
+            <span>보기</span>
+            <span>정렬</span>
+            <span>도움말</span>
+          </div>
 
-      <section className="mx-auto max-w-7xl px-4 py-10">
-        {/* Filters */}
-        <div className="panel p-4 md:p-5 mb-6">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono uppercase text-sm text-muted-foreground mr-2">Year:</span>
-            {years.map((y) => (
+          <header className="archive-feed-profile">
+            <div className="archive-feed-avatar" aria-hidden="true">
+              Y
+            </div>
+            <div className="archive-feed-identity">
+              <p className="font-mono">YULIN.zip</p>
+              <h1>AI Video Archive</h1>
+              <p>
+                공개한 프로젝트와 작은 실험을 한곳에 모았습니다. 썸네일을 클릭하면 제작 과정과
+                결과물을 볼 수 있습니다.
+              </p>
+            </div>
+            <dl className="archive-feed-stats">
+              <div>
+                <dt>{works.length}</dt>
+                <dd>projects</dd>
+              </div>
+              <div>
+                <dt>{CATEGORIES.length}</dt>
+                <dd>categories</dd>
+              </div>
+              <div>
+                <dt>2022—now</dt>
+                <dd>production</dd>
+              </div>
+            </dl>
+          </header>
+
+          <nav className="archive-feed-tabs" aria-label="아카이브 카테고리">
+            <button
+              type="button"
+              aria-pressed={category === "ALL"}
+              onClick={() => setCategory("ALL")}
+              className={category === "ALL" ? "is-active" : ""}
+            >
+              전체
+            </button>
+            {CATEGORIES.map((item) => (
               <button
-                key={y}
-                onClick={() => setYear(y)}
-                className={
-                  y === year
-                    ? "sticker-pink cursor-pointer"
-                    : "sticker cursor-pointer hover:bg-foreground hover:text-background"
-                }
+                key={item}
+                type="button"
+                aria-pressed={category === item}
+                onClick={() => setCategory(item)}
+                className={category === item ? "is-active" : ""}
               >
-                {y}
+                {CATEGORY_LABELS[item]}
               </button>
             ))}
-          </div>
-          <div className="flex flex-wrap items-center gap-2 mt-3">
-            <span className="font-mono uppercase text-sm text-muted-foreground mr-2">Tag:</span>
-            {tags.map((t) => (
-              <button
-                key={t}
-                onClick={() => setTag(t)}
-                className={
-                  t === tag
-                    ? "sticker-pink cursor-pointer"
-                    : "sticker cursor-pointer hover:bg-foreground hover:text-background"
-                }
-              >
-                #{t}
-              </button>
-            ))}
-          </div>
-        </div>
+          </nav>
 
-        {/* Table */}
-        <div className="panel overflow-hidden">
-          <div className="hidden md:grid grid-cols-[80px_1fr_1.2fr_120px_1fr_120px] gap-4 px-5 py-3 bg-foreground text-background font-mono uppercase text-xs tracking-wider">
-            <div>#</div>
-            <div>Title</div>
-            <div>Category</div>
-            <div>Year</div>
-            <div>Role</div>
-            <div className="text-right">Open</div>
-          </div>
-          <ul>
-            {filtered.map((e, i) => (
-              <li
-                key={e.slug}
-                className="grid grid-cols-[1fr_auto] md:grid-cols-[80px_1fr_1.2fr_120px_1fr_120px] gap-x-4 gap-y-2 px-5 py-4 border-t-2 border-foreground items-center hover:bg-primary/10 transition-colors"
-              >
-                <div className="font-display text-2xl text-chrome-pink md:col-auto col-start-1">
-                  {String(i + 1).padStart(3, "0")}
-                </div>
-                <div className="min-w-0 col-span-2 md:col-span-1 md:col-start-2 order-2 md:order-none">
-                  <div className="font-display text-xl md:text-2xl truncate">{e.title}</div>
-                  <div className="md:hidden font-mono text-sm text-muted-foreground">{e.category} · {e.year}</div>
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {e.tags.slice(0, 3).map((t) => (
-                      <span key={t} className="font-mono text-xs px-1.5 py-0.5 border border-foreground rounded-full">#{t}</span>
-                    ))}
+          <div className="archive-feed-scroll" aria-live="polite">
+            <div className="archive-feed-grid">
+              {filtered.map((work, index) => (
+                <Link
+                  key={work.slug}
+                  to="/works/$slug"
+                  params={{ slug: work.slug }}
+                  className="archive-feed-card group"
+                >
+                  <div className="archive-feed-image">
+                    <img
+                      src={work.thumb}
+                      alt={`${work.title} 프로젝트 썸네일`}
+                      width={1280}
+                      height={720}
+                      loading="lazy"
+                    />
+                    <span>FILE {String(index + 1).padStart(2, "0")}</span>
                   </div>
-                </div>
-                <div className="hidden md:block font-mono text-sm">{e.category}</div>
-                <div className="hidden md:block font-mono text-sm">{e.year}</div>
-                <div className="hidden md:block font-mono text-sm text-muted-foreground truncate">{e.role}</div>
-                <div className="justify-self-end col-start-2 md:col-auto row-start-1 md:row-auto">
-                  {e.hasCase ? (
-                    <Link to="/works/$slug" params={{ slug: e.slug }} className="chrome-btn-pink text-xs">Case →</Link>
-                  ) : (
-                    <span className="sticker text-xs opacity-60">Archived</span>
-                  )}
-                </div>
-              </li>
-            ))}
-            {filtered.length === 0 && (
-              <li className="px-5 py-12 text-center font-mono text-lg">
-                No entries match that filter. <button onClick={() => { setYear("ALL"); setTag("ALL"); }} className="underline text-primary">Reset →</button>
-              </li>
-            )}
-          </ul>
-        </div>
+                  <div className="archive-feed-card-meta">
+                    <strong>{work.title}</strong>
+                    <span>
+                      {CATEGORY_LABELS[work.category]} · {work.year}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
 
-        <div className="mt-8 flex flex-wrap gap-3 justify-between items-center">
-          <p className="font-mono text-sm text-muted-foreground">
-            ♥ Older work + experiments stay archived — ask for the showreel.
-          </p>
-          <Link to="/contact" className="chrome-btn">Request showreel →</Link>
+            {filtered.length === 0 && (
+              <div className="archive-feed-empty">선택한 분류에 저장된 프로젝트가 없습니다.</div>
+            )}
+          </div>
+
+          <div className="archive-feed-statusbar">
+            <span>● READY · {filtered.length} FILES</span>
+            <span>C:\YULIN.zip\ARCHIVE</span>
+          </div>
+
+          <nav className="archive-feed-bottom" aria-label="아카이브 바로가기">
+            <Link to="/" aria-label="홈">
+              ⌂ <span>홈</span>
+            </Link>
+            <span className="is-current" aria-current="page">
+              ▦ <span>그리드</span>
+            </span>
+            <Link to="/works" aria-label="프로젝트">
+              ▣ <span>프로젝트</span>
+            </Link>
+            <Link to="/contact" aria-label="문의">
+              ♡ <span>문의</span>
+            </Link>
+          </nav>
         </div>
       </section>
     </PageShell>
