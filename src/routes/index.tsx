@@ -308,14 +308,22 @@ const OPENING_SESSION_KEY = "yulin-os-intro-played";
 
 function Home() {
   const clock = useClock();
-  const [showOpening, setShowOpening] = useState(() => {
-    if (typeof window === "undefined") return false;
+  // Start false on both server and initial client render to avoid hydration mismatch.
+  // Decide whether to show the intro in a post-mount effect.
+  const [showOpening, setShowOpening] = useState(false);
+
+  useEffect(() => {
     try {
-      return window.sessionStorage.getItem(OPENING_SESSION_KEY) !== "1";
+      const params = new URLSearchParams(window.location.search);
+      const force = params.get("intro") === "true";
+      const played = window.sessionStorage.getItem(OPENING_SESSION_KEY) === "1";
+      if (force || !played) {
+        setShowOpening(true);
+      }
     } catch {
-      return true;
+      setShowOpening(true);
     }
-  });
+  }, []);
 
   const completeOpening = () => {
     try {
@@ -325,6 +333,7 @@ function Home() {
     }
     setShowOpening(false);
   };
+
 
 
   return (
