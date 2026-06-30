@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PageShell } from "@/components/Layout";
-import { OpeningSequence } from "@/components/OpeningSequence";
 import { CATEGORY_LABELS, featuredWorks as works, works as allWorks } from "@/lib/works";
 
 export const Route = createFileRoute("/")({
@@ -304,22 +303,12 @@ function ShowreelPlayer() {
   );
 }
 
-let hasPlayedOpening = false;
-
 function Home() {
   const clock = useClock();
-  const [showOpening, setShowOpening] = useState(() =>
-    typeof window === "undefined" ? true : !hasPlayedOpening,
-  );
 
-  const completeOpening = () => {
-    hasPlayedOpening = true;
-    setShowOpening(false);
-  };
 
   return (
     <>
-      {showOpening && <OpeningSequence onComplete={completeOpening} />}
       <PageShell>
         {/* ============ DESKTOP ============ */}
         <div className="home-desktop relative">
