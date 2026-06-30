@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PageShell } from "@/components/Layout";
-import { OpeningSequence } from "@/components/OpeningSequence";
 import { CATEGORY_LABELS, featuredWorks as works, works as allWorks } from "@/lib/works";
 
 export const Route = createFileRoute("/")({
@@ -304,41 +303,14 @@ function ShowreelPlayer() {
   );
 }
 
-const OPENING_SESSION_KEY = "yulin-os-intro-played";
-
 function Home() {
   const clock = useClock();
-  // Start false on both server and initial client render to avoid hydration mismatch.
-  // Decide whether to show the intro in a post-mount effect.
-  const [showOpening, setShowOpening] = useState(false);
 
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const force = params.get("intro") === "true";
-      const played = window.sessionStorage.getItem(OPENING_SESSION_KEY) === "1";
-      if (force || !played) {
-        setShowOpening(true);
-      }
-    } catch {
-      setShowOpening(true);
-    }
-  }, []);
-
-  const completeOpening = () => {
-    try {
-      window.sessionStorage.setItem(OPENING_SESSION_KEY, "1");
-    } catch {
-      /* ignore */
-    }
-    setShowOpening(false);
-  };
 
 
 
   return (
     <>
-      {showOpening && <OpeningSequence onComplete={completeOpening} />}
       <PageShell>
         {/* ============ DESKTOP ============ */}
         <div className="home-desktop relative">
