@@ -304,18 +304,28 @@ function ShowreelPlayer() {
   );
 }
 
-let hasPlayedOpening = false;
+const OPENING_SESSION_KEY = "yulin-os-intro-played";
 
 function Home() {
   const clock = useClock();
-  const [showOpening, setShowOpening] = useState(() =>
-    typeof window === "undefined" ? true : !hasPlayedOpening,
-  );
+  const [showOpening, setShowOpening] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return window.sessionStorage.getItem(OPENING_SESSION_KEY) !== "1";
+    } catch {
+      return true;
+    }
+  });
 
   const completeOpening = () => {
-    hasPlayedOpening = true;
+    try {
+      window.sessionStorage.setItem(OPENING_SESSION_KEY, "1");
+    } catch {
+      /* ignore */
+    }
     setShowOpening(false);
   };
+
 
   return (
     <>
