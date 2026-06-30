@@ -1,628 +1,582 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { PageShell } from "@/components/Layout";
-import { CATEGORY_LABELS, featuredWorks as works, works as allWorks } from "@/lib/works";
+import { useEffect, useRef, useState } from "react";
+import chromeBg from "@/assets/chrome-bg.jpg";
+import { works } from "@/lib/works";
 
 export const Route = createFileRoute("/")({
+  loader: () => ({ projects }),
   head: () => ({
     meta: [
-      { title: "YULIN.zip — AI 영상 크리에이터" },
+      { title: "YULIN.ZIP — AI 영상 크리에이터" },
       {
         name: "description",
         content:
-          "브랜드 필름, 광고, 비주얼 스토리를 만드는 AI 영상 크리에이터 YULIN의 포트폴리오입니다.",
+          "AI로 장면을 설계하고 이미지와 움직임을 만들어 편집으로 완성하는 YULIN의 포트폴리오입니다.",
       },
-      { property: "og:title", content: "YULIN.zip — AI 영상 크리에이터" },
-      { property: "og:description", content: "브랜드 필름 · 광고 · 비주얼 스토리" },
+      { property: "og:title", content: "YULIN.ZIP — AI 영상 크리에이터" },
+      {
+        property: "og:description",
+        content: "Brand Film · Music Video · Fashion Film · AI Image · AI Video · Editing",
+      },
     ],
   }),
   component: Home,
 });
 
-function WindowFrame({
-  title,
-  variant = "pink",
-  className = "",
-  children,
-  status,
-}: {
-  title: string;
-  variant?: "pink" | "silver";
-  className?: string;
-  children: React.ReactNode;
-  status?: string;
-}) {
-  return (
-    <div className={`win ${className}`}>
-      <div className={variant === "pink" ? "win-bar" : "win-bar-silver"}>
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="win-dot">▣</span>
-          <span className="truncate">{title}</span>
-        </div>
-        <div className="flex items-center gap-1 shrink-0" aria-hidden="true">
-          <span className="win-dot">_</span>
-          <span className="win-dot">▢</span>
-          <span className="win-dot">×</span>
-        </div>
-      </div>
-      {children}
-      {status && (
-        <div className="px-3 py-1 border-t-2 border-foreground bg-muted font-mono text-sm flex items-center justify-between">
-          <span>{status}</span>
-          <span className="blink">▮</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function useClock() {
-  const [t, setT] = useState("--:--:--");
-  useEffect(() => {
-    const tick = () => {
-      const d = new Date();
-      setT(d.toTimeString().slice(0, 8));
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-  return t;
-}
-
-const SHOWREEL_CLIPS = [
-  { slug: "midnight-railway-diner", label: "철길심야식당", tag: "실험 영상", t: "00:00" },
-  { slug: "sodeung", label: "SODEUNG", tag: "뮤직비디오", t: "00:32" },
-  { slug: "post-apocalypse-paris", label: "POST-APOCALYPSE PARIS", tag: "패션", t: "01:08" },
+const sections = [
+  ["home", "HOME"],
+  ["human", "HUMAN-IN-THE-LOOP"],
+  ["workflow", "WORKFLOW"],
+  ["skills", "SKILLS"],
+  ["projects", "PROJECTS"],
+  ["update-log", "UPDATE LOG"],
+  ["contact", "CONTACT"],
 ] as const;
 
-const SHOWREEL_TOTAL_SEC = 168; // 02:48
+const workflow = [
+  ["01", "기획", "프로젝트의 목표와 이야기를 구체화합니다."],
+  ["02", "무드보드", "분위기와 방향성을 시각적으로 정리합니다."],
+  ["03", "프롬프트 설계", "원하는 결과를 위한 프롬프트를 구성합니다."],
+  ["04", "AI 이미지", "장면의 기준이 되는 이미지를 제작합니다."],
+  ["05", "AI 영상", "이미지를 자연스러운 움직임으로 확장합니다."],
+  ["06", "편집", "영상, 사운드, 자막을 하나의 흐름으로 완성합니다."],
+  ["07", "완성", "최종 결과물을 검토하고 출력합니다."],
+] as const;
 
-function pad(n: number) {
-  return n.toString().padStart(2, "0");
-}
-function fmtTime(s: number) {
-  return `${pad(Math.floor(s / 60))}:${pad(Math.floor(s % 60))}`;
-}
+const skills = [
+  [
+    "AI 이미지 제작",
+    "프로젝트의 콘셉트와 분위기에 맞는 이미지를 제작합니다.",
+    "Midjourney · Photoshop",
+  ],
+  [
+    "AI 영상 제작",
+    "이미지를 움직임과 카메라 연출로 확장합니다.",
+    "Higgsfield · Seedance · Kling · Veo 3",
+  ],
+  [
+    "프롬프트 설계",
+    "목표에 맞는 결과를 얻기 위해 프롬프트를 설계하고 개선합니다.",
+    "ChatGPT · Claude · Gemini",
+  ],
+  [
+    "자료 조사 및 정리",
+    "레퍼런스와 프로젝트 자료를 수집하고 체계적으로 정리합니다.",
+    "NotebookLM · Notion · Pinterest",
+  ],
+  [
+    "바이브 코딩",
+    "AI를 활용해 웹사이트와 간단한 서비스를 빠르게 구현합니다.",
+    "Lovable · Cursor · Codex",
+  ],
+  [
+    "영상 편집",
+    "컷 편집, 사운드, 자막, 색보정을 통해 완성도를 높입니다.",
+    "Premiere Pro · After Effects",
+  ],
+] as const;
 
-function ShowreelPlayer() {
-  const clips = useMemo(() => {
-    return SHOWREEL_CLIPS.map((c) => {
-      const w = allWorks.find((x) => x.slug === c.slug);
-      return { ...c, thumb: w?.thumb ?? "", year: w?.year ?? "" };
-    });
-  }, []);
-  const [idx, setIdx] = useState(0);
-  const [playing, setPlaying] = useState(true);
-  const [elapsed, setElapsed] = useState(0);
+const updates = [
+  ["v0.1.0", "시작", "'무엇을 만들까'보다 '왜 만들어야 할까'를 먼저 고민하기 시작했습니다."],
+  [
+    "v0.8.2",
+    "실험",
+    "새로운 AI 도구를 배우고, 같은 장면을 여러 방식으로 구현하며, 결과보다 과정에 더 많은 시간을 보냈습니다.",
+  ],
+  [
+    "v1.0.0",
+    "기록",
+    "이곳에 담긴 프로젝트들은 완성된 결과물이면서 동시에 새로운 시작입니다. 기술은 계속 변하지만, 좋은 이야기를 만들고 싶은 마음은 그대로입니다.",
+  ],
+  [
+    "NEXT UPDATE",
+    "계속",
+    "아직 압축되지 않은 프로젝트가 남아 있습니다. 이 기록은 계속 이어집니다.",
+  ],
+] as const;
 
-  useEffect(() => {
-    if (!playing) return;
-    const id = setInterval(() => {
-      setElapsed((e) => {
-        const next = e + 1;
-        if (next >= SHOWREEL_TOTAL_SEC) {
-          setIdx((i) => (i + 1) % clips.length);
-          return 0;
-        }
-        // advance idx based on timestamps
-        const tToSec = (t: string) => {
-          const [m, s] = t.split(":").map(Number);
-          return m * 60 + s;
-        };
-        const newIdx = clips.reduce((acc, c, i) => (tToSec(c.t) <= next ? i : acc), 0);
-        setIdx(newIdx);
-        return next;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, [playing, clips]);
+const projectImage = (slug: string) => works.find((work) => work.slug === slug)?.thumb ?? chromeBg;
 
-  const current = clips[idx];
-  const progress = (elapsed / SHOWREEL_TOTAL_SEC) * 100;
-  const chapterSecond = (chapterIndex: number) => {
-    const [m, s] = clips[chapterIndex].t.split(":").map(Number);
-    return m * 60 + s;
-  };
-  const seek = (second: number) => {
-    const next = Math.max(0, Math.min(SHOWREEL_TOTAL_SEC - 1, second));
-    const nextIdx = clips.reduce((acc, c, i) => (chapterSecond(i) <= next ? i : acc), 0);
-    setElapsed(next);
-    setIdx(nextIdx);
-  };
-  const selectChapter = (chapterIndex: number) => {
-    setIdx(chapterIndex);
-    setElapsed(chapterSecond(chapterIndex));
-  };
+export type PortfolioProject = {
+  number: string;
+  title: string;
+  category: string;
+  description: string;
+  image: string;
+  youtubeId?: string;
+  youtubeUrl?: string;
+  aspectRatio?: "16:9" | "9:16";
+};
 
-  return (
-    <div id="showreel" className="showreel-shell scroll-mt-32">
-      <WindowFrame title="SHOWREEL_2026.MP4" variant="silver">
-        <div className="showreel-player-shell">
-          {/* Video area */}
-          <div className="showreel-screen relative aspect-[4/3] overflow-hidden">
-            {clips.map((c, i) => (
-              <img
-                key={c.slug}
-                src={c.thumb}
-                alt={c.label}
-                className={`showreel-preview absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`}
-                loading={i === 0 ? "eager" : "lazy"}
-              />
-            ))}
-            {/* Scanline overlay */}
-            <div
-              className="pointer-events-none absolute inset-0 mix-blend-overlay opacity-30"
-              style={{
-                backgroundImage:
-                  "repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 1px, transparent 1px 3px)",
-              }}
-              aria-hidden
-            />
-            {/* Top labels */}
-            <div className="absolute top-2 left-2 right-2 flex items-start justify-between gap-2">
-              <div className="sticker-pink text-xs">HADURI FILTER</div>
-              <div className="sticker text-[10px] text-signal">● CAM 02 · LOW-FI</div>
-            </div>
-            {/* Center play button */}
-            <button
-              type="button"
-              onClick={() => setPlaying((p) => !p)}
-              aria-label={playing ? "쇼릴 일시정지" : "쇼릴 재생"}
-              className="absolute inset-0 grid place-items-center group"
-            >
-              <span className="media-play-button">{playing ? "❚❚" : "▶"}</span>
-            </button>
-            {/* Bottom title strip */}
-            <div className="absolute bottom-0 inset-x-0 bg-foreground/85 text-background px-3 py-2 font-mono text-xs flex items-center justify-between gap-2">
-              <span className="truncate">
-                <span className="text-chrome-pink">▶</span> {current.label}
-              </span>
-              <span className="opacity-70 shrink-0">
-                {current.tag} · {current.year}
-              </span>
-            </div>
-          </div>
+const projects: PortfolioProject[] = [
+  {
+    number: "01",
+    title: "철길 심야식당",
+    category: "Brand Film",
+    description:
+      "브랜드의 이야기를 2000년대 한국·일본 심야 드라마 감성으로 재해석한 AI 브랜드 필름.",
+    image: projectImage("midnight-railway-diner"),
+  },
+  {
+    number: "02",
+    title: "Starlight",
+    category: "AI Music Video",
+    description: "가상의 아티스트를 위한 세계관과 퍼포먼스를 담은 AI 뮤직비디오.",
+    image: projectImage("arcade-heart"),
+  },
+  {
+    number: "03",
+    title: "Balenciaga Campaign",
+    category: "AI Fashion Film",
+    description: "패션 브랜드의 아이덴티티를 시네마틱한 영상으로 표현한 AI 패션 캠페인.",
+    image: projectImage("post-apocalypse-paris"),
+  },
+  {
+    number: "04",
+    title: "YULIN.ZIP",
+    category: "Interactive Portfolio",
+    description: "포트폴리오 자체를 하나의 경험으로 설계한 인터랙티브 웹 프로젝트.",
+    image: chromeBg,
+  },
+  {
+    number: "05",
+    title: "SODEUNG",
+    category: "Original Cinematic Film",
+    description:
+      "의뢰를 위한 작품이 아닌, 제가 가장 만들고 싶었던 장면과 감정을 담은 오리지널 시네마틱 프로젝트.",
+    image: projectImage("sodeung"),
+  },
+];
 
-          {/* Webcam filter presets */}
-          <div className="showreel-filter-tabs" aria-label="쇼릴 필터">
-            {["Y2Ki", "HADURI", "FUTURE", "ARCHIVE"].map((filter) => (
-              <span
-                key={filter}
-                className={filter === "HADURI" ? "showreel-filter is-active" : "showreel-filter"}
-              >
-                {filter}
-              </span>
-            ))}
-          </div>
+export function getYouTubeId(project: PortfolioProject) {
+  if (project.youtubeId) return project.youtubeId;
+  if (!project.youtubeUrl) return null;
 
-          {/* Transport / progress */}
-          <div className="bg-white px-3 py-2 border-t-2 border-foreground">
-            {/* Progress bar */}
-            <div
-              role="slider"
-              tabIndex={0}
-              aria-label="쇼릴 재생 위치"
-              aria-valuemin={0}
-              aria-valuemax={SHOWREEL_TOTAL_SEC}
-              aria-valuenow={Math.round(elapsed)}
-              aria-valuetext={`${fmtTime(elapsed)} / ${fmtTime(SHOWREEL_TOTAL_SEC)}`}
-              className="relative h-4 border-2 border-foreground bg-muted rounded-sm overflow-hidden cursor-pointer"
-              onClick={(e) => {
-                const r = e.currentTarget.getBoundingClientRect();
-                const pct = (e.clientX - r.left) / r.width;
-                seek(pct * SHOWREEL_TOTAL_SEC);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowLeft") {
-                  e.preventDefault();
-                  seek(elapsed - 5);
-                }
-                if (e.key === "ArrowRight") {
-                  e.preventDefault();
-                  seek(elapsed + 5);
-                }
-                if (e.key === "Home") {
-                  e.preventDefault();
-                  seek(0);
-                }
-                if (e.key === "End") {
-                  e.preventDefault();
-                  seek(SHOWREEL_TOTAL_SEC - 1);
-                }
-              }}
-            >
-              <div className="showreel-progress h-full" style={{ width: `${progress}%` }} />
-              <div
-                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 border-2 border-foreground bg-white rounded-full shadow-[1px_1px_0_var(--ink)]"
-                style={{ left: `calc(${progress}% - 6px)` }}
-                aria-hidden
-              />
-            </div>
-            {/* Timestamp + transport */}
-            <div className="mt-2 flex items-center justify-between font-mono text-xs">
-              <span>
-                {fmtTime(elapsed)} / {fmtTime(SHOWREEL_TOTAL_SEC)}
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => selectChapter((idx - 1 + clips.length) % clips.length)}
-                  className="showreel-transport-button"
-                  aria-label="이전 챕터"
-                >
-                  PREV
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPlaying((p) => !p)}
-                  className="showreel-transport-button showreel-transport-play"
-                  aria-label={playing ? "일시정지" : "재생"}
-                >
-                  {playing ? "❚❚" : "▶"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => selectChapter((idx + 1) % clips.length)}
-                  className="showreel-transport-button"
-                  aria-label="다음 챕터"
-                >
-                  NEXT
-                </button>
-              </div>
-            </div>
-            {/* Chapter list */}
-            <ol className="mt-2 border-t border-foreground/20 pt-2 space-y-0.5">
-              {clips.map((c, i) => (
-                <li key={c.slug}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      selectChapter(i);
-                    }}
-                    aria-current={i === idx ? "true" : undefined}
-                    className={`w-full min-h-8 grid grid-cols-[auto_1fr_auto] items-center gap-2 px-1.5 py-1 font-mono text-[11px] rounded-sm text-left ${i === idx ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
-                  >
-                    <span className="opacity-70">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="truncate">{c.label}</span>
-                    <span className="opacity-70">{c.tag}</span>
-                  </button>
-                </li>
-              ))}
-            </ol>
-          </div>
-          <div className="px-3 py-2 border-t-2 border-foreground bg-muted font-mono text-xs flex justify-between items-center">
-            <span className="text-signal">● READY</span>
-            <Link to="/works" className="underline underline-offset-2 hover:text-primary">
-              프로젝트 3개 열기 →
-            </Link>
-          </div>
-        </div>
-      </WindowFrame>
-    </div>
-  );
+  try {
+    const url = new URL(project.youtubeUrl);
+    if (url.hostname === "youtu.be") return url.pathname.slice(1) || null;
+    if (url.pathname.startsWith("/shorts/")) return url.pathname.split("/")[2] || null;
+    if (url.pathname.startsWith("/embed/")) return url.pathname.split("/")[2] || null;
+    return url.searchParams.get("v");
+  } catch {
+    return null;
+  }
 }
 
 function Home() {
-  const clock = useClock();
+  const screenRef = useRef<HTMLDivElement>(null);
+  const [activeSection, setActiveSection] = useState("home");
+  const [selectedProject, setSelectedProject] = useState<PortfolioProject | null>(null);
+  const { projects: projectItems } = Route.useLoaderData();
 
+  useEffect(() => {
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
 
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, []);
 
+  useEffect(() => {
+    const root = screenRef.current;
+    if (!root) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible?.target.id) setActiveSection(visible.target.id);
+      },
+      { root, threshold: [0.35, 0.55, 0.75] },
+    );
+
+    root
+      .querySelectorAll<HTMLElement>(".crt-section")
+      .forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <>
-      <PageShell>
-        {/* ============ DESKTOP ============ */}
-        <div className="home-desktop relative">
-          <div className="mx-auto max-w-7xl px-3 sm:px-4 md:px-6 py-8 md:py-14 space-y-8 md:space-y-10">
-            {/* ===== TOP ROW: README + SHOWREEL ===== */}
-            <div className="hero-webcore-zone">
-              <div className="webcore-decorations" aria-hidden="true">
-                <span className="decor-folder" />
-                <span className="decor-folder decor-folder-secondary" />
-                <span className="decor-cd" />
-                <span className="decor-cursor" />
-                <span className="decor-star">★</span>
-                <span className="decor-heart">♥</span>
-                <span className="decor-bubble decor-bubble-a" />
-                <span className="decor-bubble decor-bubble-b" />
-                <span className="decor-bubble decor-bubble-c" />
-                <span className="decor-os-label">YULIN OS · READY</span>
-              </div>
-              <div className="grid gap-5 md:gap-6 lg:grid-cols-12">
-                <WindowFrame
-                  title="YULIN.ZIP / README.TXT"
-                  className="lg:col-span-7"
-                  status={`ONLINE · ${clock} · SEOUL / REMOTE`}
-                >
-                  <div className="readme-surface p-6 sm:p-8 md:p-10">
-                    <div className="readme-meta flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
-                      <span className="readme-status">● YULIN PERSONAL ARCHIVE</span>
-                      <span>OWNER: YULIN · 2.4 KB</span>
-                    </div>
-                    <div className="readme-copy mt-7 max-w-xl space-y-4 font-body font-medium text-[15px] sm:text-base leading-[1.68] tracking-[-0.02em]">
-                      <p className="readme-welcome">YULIN.zip에 오신 것을 환영합니다.</p>
-                      <p>
-                        이곳은 제가 만들고 모아온 영상,
-                        <br className="hidden sm:block" /> 장면, 그리고 좋아하는 무드를 정리해둔
-                        개인 아카이브입니다.
-                      </p>
-                      <p>
-                        브랜드 필름, 뮤직비디오, 실험적인 비주얼 작업까지
-                        <br className="hidden sm:block" /> 기억하고 싶은 화면들을 하나씩 꺼내어
-                        보여드립니다.
-                      </p>
-                    </div>
-                    <h1 className="readme-title mt-8 font-display text-[2.15rem] sm:text-4xl md:text-5xl leading-[1.02] tracking-[-0.04em]">
-                      <span className="readme-headline block">
-                        <span className="text-primary">AI</span> 영상 크리에이터
-                      </span>
-                      <span className="readme-subtitle block mt-3 font-body font-bold text-base sm:text-lg md:text-xl tracking-[-0.025em]">
-                        장면과 무드를 모으는 영상 작업 아카이브
-                      </span>
-                    </h1>
-                    <div className="mt-8 flex flex-wrap gap-3">
-                      <Link to="/works" className="chrome-btn-pink text-sm w-full sm:w-auto">
-                        ▶ 대표 프로젝트 보기
-                      </Link>
-                      <a href="#showreel" className="chrome-btn text-sm w-full sm:w-auto">
-                        ▶ 쇼릴 보기
-                      </a>
-                    </div>
-                  </div>
-                </WindowFrame>
+    <main className="portfolio-stage">
+      <a className="skip-link" href="#home">
+        CRT 콘텐츠로 바로가기
+      </a>
 
-                <div className="lg:col-span-5">
-                  <ShowreelPlayer />
-                </div>
-              </div>
+      <div className="y2k-backdrop" aria-hidden="true">
+        <span className="backdrop-orbit backdrop-orbit-a" />
+        <span className="backdrop-orbit backdrop-orbit-b" />
+        <span className="backdrop-star backdrop-star-a">✦</span>
+        <span className="backdrop-star backdrop-star-b">✧</span>
+        <span className="backdrop-label backdrop-label-a">YULIN OS / DISPLAY 01</span>
+        <span className="backdrop-label backdrop-label-b">ARCHIVE ONLINE · 2026</span>
+      </div>
+
+      <div className="crt-wrap">
+        <div className="crt-monitor">
+          <div className="crt-bezel">
+            <div className="crt-brand" aria-hidden="true">
+              <span>YULIN</span>
+              <span>COLOR DISPLAY 2000</span>
             </div>
 
-            {/* ===== FEATURED PROJECTS ===== */}
-            <WindowFrame title="FEATURED_PROJECTS / 03 FILES" variant="silver">
-              <div className="bg-white p-4 md:p-6">
-                <div className="works-magazine-strip" aria-label="선정 프로젝트 정보">
-                  <span className="works-magazine-title">SELECTED WORK</span>
-                  <span className="works-magazine-vol">VOL.01 / AI VIDEO ARCHIVE</span>
-                  <span className="works-barcode" aria-hidden="true" />
-                  <span className="works-new-label">NEW UPLOAD ♥</span>
-                </div>
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-mono text-xs text-muted-foreground">
-                    작품을 선택하면 상세 제작 과정을 볼 수 있습니다.
-                  </span>
-                  <span className="font-pixel text-[11px] text-primary">♥ EDITOR'S PICK</span>
-                </div>
-                <div className="grid gap-4 md:grid-cols-3">
-                  {works.slice(0, 3).map((work, index) => (
-                    <Link
-                      key={work.slug}
-                      to="/works/$slug"
-                      params={{ slug: work.slug }}
-                      className="featured-project group"
-                    >
-                      <div className="relative aspect-video overflow-hidden bg-foreground">
-                        <img
-                          src={work.thumb}
-                          alt={`${work.title} 대표 장면`}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                          loading="lazy"
-                        />
-                        <span className="absolute left-2 top-2 system-label">
-                          FILE {String(index + 1).padStart(2, "0")}
-                        </span>
-                      </div>
-                      <div className="p-4">
-                        <div className="font-display text-xl leading-tight">{work.title}</div>
-                        <div className="mt-1 font-mono text-[11px] text-muted-foreground">
-                          {CATEGORY_LABELS[work.category]} · {work.year}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </WindowFrame>
-
-            {/* ===== RECENT FILES (selected works) ===== */}
-            <WindowFrame
-              title="최근_프로젝트.exe — 최신순"
-              status={`${works.length}개 파일 · 형식: video/mp4 · 보기: 자세히`}
-            >
-              <div className="bg-white">
-                {/* table header */}
-                <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-2 border-b-2 border-foreground bg-muted font-mono text-xs uppercase">
-                  <div className="col-span-1">번호</div>
-                  <div className="col-span-5">프로젝트</div>
-                  <div className="col-span-3">분류</div>
-                  <div className="col-span-1">연도</div>
-                  <div className="col-span-2 text-right">열기</div>
-                </div>
-                <ul>
-                  {works.map((w, i) => (
-                    <li key={w.slug} className="border-b border-foreground/20 last:border-b-0">
-                      <Link
-                        to="/works/$slug"
-                        params={{ slug: w.slug }}
-                        className="group grid grid-cols-12 gap-3 items-center px-3 md:px-4 py-3 hover:bg-muted focus:bg-muted transition-colors"
+            <div className="crt-screen-shell">
+              <div
+                ref={screenRef}
+                className={`crt-screen ${selectedProject ? "is-playing" : ""}`}
+                tabIndex={0}
+              >
+                <nav className="crt-nav" aria-label="포트폴리오 섹션">
+                  <a href="#home" className="crt-logo" aria-label="YULIN.ZIP 홈">
+                    YULIN<span>.ZIP</span>
+                  </a>
+                  <div className="crt-nav-links">
+                    {sections.map(([id, label]) => (
+                      <a
+                        key={id}
+                        href={`#${id}`}
+                        aria-current={activeSection === id ? "page" : undefined}
+                        className={activeSection === id ? "is-active" : ""}
                       >
-                        <div className="col-span-2 md:col-span-1">
-                          <div className="relative w-14 h-14 md:w-12 md:h-12 border-2 border-foreground overflow-hidden rounded-sm bg-foreground">
-                            <img
-                              src={w.thumb}
-                              alt=""
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                            />
-                          </div>
-                        </div>
-                        <div className="col-span-10 md:col-span-5 min-w-0">
-                          <div className="font-display text-xl leading-none truncate">
-                            {w.title}
-                          </div>
-                          <div className="font-mono text-xs opacity-70 truncate">
-                            {w.slug}.mp4
-                            {w.duration ? ` · ${w.duration}` : ""}
-                          </div>
-                        </div>
-                        <div className="col-span-7 md:col-span-3 font-mono text-sm">
-                          <span className="sticker text-xs">{CATEGORY_LABELS[w.category]}</span>
-                        </div>
-                        <div className="col-span-2 md:col-span-1 font-mono text-sm">{w.year}</div>
-                        <div className="col-span-3 md:col-span-2 text-right font-mono text-sm">
-                          <span className="inline-flex items-center gap-1 group-hover:text-primary">
-                            ▶ 열기 →
-                          </span>
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-                <div className="px-4 py-3 border-t-2 border-foreground bg-muted flex justify-between items-center">
-                  <span className="font-mono text-sm opacity-70">전체 프로젝트 보기</span>
-                  <Link to="/works" className="chrome-btn text-xs">
-                    ▶ 전체 보기
-                  </Link>
-                </div>
-              </div>
-            </WindowFrame>
-
-            {/* ===== PROCESS + ABOUT ===== */}
-            <div className="grid gap-5 md:gap-6 lg:grid-cols-12">
-              <WindowFrame title="제작과정.exe — 영상이 완성되는 과정" className="lg:col-span-7">
-                <div className="bg-white p-4 md:p-6">
-                  <div className="font-mono text-sm uppercase text-muted-foreground mb-3">
-                    제작 과정 · 04단계
+                        {label}
+                      </a>
+                    ))}
                   </div>
-                  <ol className="space-y-3">
-                    {[
-                      {
-                        n: "01",
-                        t: "기획과 무드",
-                        d: "목표를 정리하고 레퍼런스와 트리트먼트를 설계합니다.",
-                      },
-                      {
-                        n: "02",
-                        t: "프리비주얼",
-                        d: "스틸 이미지로 스타일과 캐릭터의 일관성을 잡습니다.",
-                      },
-                      {
-                        n: "03",
-                        t: "생성과 디렉팅",
-                        d: "장면마다 가장 적합한 AI 도구로 움직임을 연출합니다.",
-                      },
-                      {
-                        n: "04",
-                        t: "후반 작업과 완성",
-                        d: "편집, 색보정, 사운드 디자인으로 최종 완성도를 높입니다.",
-                      },
-                    ].map((s) => (
-                      <li
-                        key={s.n}
-                        className="flex gap-4 items-start border-2 border-foreground rounded-md p-3 bg-muted"
-                      >
-                        <div className="font-display text-3xl text-foreground leading-none">
-                          {s.n}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-display text-lg leading-tight">{s.t}</div>
-                          <div className="font-body text-sm leading-relaxed text-muted-foreground">
-                            {s.d}
+                </nav>
+
+                {selectedProject && (
+                  <ProjectPlayer
+                    project={selectedProject}
+                    onBack={() => {
+                      setSelectedProject(null);
+                      requestAnimationFrame(() => {
+                        document.querySelector("#projects")?.scrollIntoView({ block: "start" });
+                      });
+                    }}
+                  />
+                )}
+
+                <section id="home" className="crt-section crt-home">
+                  <div className="crt-kicker">
+                    <span>● SYSTEM ONLINE</span>
+                    <span>SEOUL / REMOTE</span>
+                  </div>
+                  <div className="home-file-icon" aria-hidden="true">
+                    <span>ZIP</span>
+                  </div>
+                  <p className="home-path">C:\YULIN\PORTFOLIO\README.TXT</p>
+                  <h1>YULIN.ZIP</h1>
+                  <p className="home-copy">
+                    AI를 활용해 장면을 설계하고,
+                    <br />
+                    이미지를 만들고,
+                    <br />
+                    움직임을 입히고,
+                    <br />
+                    편집으로 완성합니다.
+                  </p>
+                  <p className="home-services">
+                    BRAND FILM · MUSIC VIDEO · FASHION FILM
+                    <br />
+                    AI IMAGE · AI VIDEO · EDITING · VIBE CODING
+                  </p>
+                  <a href="#human" className="screen-button">
+                    ENTER PORTFOLIO ↓
+                  </a>
+                </section>
+
+                <section id="human" className="crt-section crt-content-section">
+                  <SectionHeading
+                    index="01"
+                    title="HUMAN-IN-THE-LOOP"
+                    subtitle="AI와 사람의 판단이 반복되는 제작 과정"
+                  />
+                  <div className="human-grid">
+                    <div className="human-copy">
+                      <p className="section-lead">AI는 결과를 생성합니다.</p>
+                      <p className="human-emphasis">
+                        하지만 좋은 결과는
+                        <br />
+                        사람의 판단과 반복적인 개선을 통해 완성됩니다.
+                      </p>
+                      <p>
+                        저는 생성된 결과를 그대로 사용하지 않습니다.
+                        <br />
+                        <br />
+                        기획하고, 분석하고, 수정하고, 다시 생성하는 과정을 반복하며 프로젝트를
+                        완성합니다.
+                        <br />
+                        <br />
+                        AI는 제작을 돕는 도구이고, 최종 결과를 완성하는 것은 사람이라고 믿습니다.
+                      </p>
+                    </div>
+                    <div className="loop-diagram" aria-label="사람과 AI의 반복 제작 과정">
+                      {["기획", "무드보드 설계", "프롬프트 설계", "AI 이미지", "AI 영상"].map(
+                        (step) => (
+                          <div key={step} className="diagram-step">
+                            <span>{step}</span>
+                            <i>↓</i>
                           </div>
+                        ),
+                      )}
+                      <div className="diagram-review">
+                        <span>검토 · 개선</span>
+                        <i>↕</i>
+                        <span>프롬프트 수정</span>
+                      </div>
+                      <div className="diagram-step">
+                        <i>↓</i>
+                        <span>편집</span>
+                        <i>↓</i>
+                      </div>
+                      <strong>Final Output</strong>
+                    </div>
+                  </div>
+                </section>
+
+                <section id="workflow" className="crt-section crt-content-section">
+                  <SectionHeading
+                    index="02"
+                    title="WORKFLOW"
+                    subtitle="아이디어가 최종 화면이 되는 과정"
+                  />
+                  <ol className="workflow-list">
+                    {workflow.map(([number, title, description]) => (
+                      <li key={number}>
+                        <span className="workflow-number">{number}</span>
+                        <div>
+                          <h3>{title}</h3>
+                          <p>{description}</p>
                         </div>
                       </li>
                     ))}
                   </ol>
-                </div>
-              </WindowFrame>
+                </section>
 
-              <WindowFrame title="소개.txt" variant="silver" className="lg:col-span-5">
-                <div className="bg-white p-4 md:p-6">
-                  <div className="sticker mb-3">⊹ 메모장.EXE</div>
-                  <h2 className="font-display text-3xl md:text-4xl">
-                    안녕하세요, <span className="text-foreground">YULIN</span>입니다
-                  </h2>
-                  <p className="mt-3 font-body text-base leading-relaxed">
-                    편집자로 시작해 지금은 AI 영상감독으로 일하고 있습니다. 생성형 도구의 가능성과
-                    전통적인 영상 제작의 치밀함을 결합해 브랜드 필름, 광고, 뮤직비디오를 만듭니다.
-                  </p>
-                  <div className="mt-4 grid grid-cols-2 gap-3 font-mono text-sm">
-                    {[
-                      { k: "프로젝트", v: "40+" },
-                      { k: "경력", v: "06년" },
-                      { k: "협업 브랜드", v: "12" },
-                      { k: "아이디어", v: "∞" },
-                    ].map((s) => (
-                      <div key={s.k} className="border-2 border-foreground rounded-md p-2 bg-muted">
-                        <div className="font-display text-2xl text-foreground leading-none">
-                          {s.v}
+                <section id="skills" className="crt-section crt-content-section">
+                  <SectionHeading
+                    index="03"
+                    title="SKILLS"
+                    subtitle="장면을 만들고 움직이고 연결하는 도구들"
+                  />
+                  <div className="skill-grid">
+                    {skills.map(([title, description, tools], index) => (
+                      <article key={title}>
+                        <span className="skill-index">0{index + 1}.EXE</span>
+                        <h3>{title}</h3>
+                        <p>{description}</p>
+                        <p className="skill-tools">Tools: {tools}</p>
+                        <div className="skill-meter" aria-hidden="true">
+                          <span />
                         </div>
-                        <div className="text-xs uppercase opacity-70 mt-1">{s.k}</div>
-                      </div>
+                      </article>
                     ))}
                   </div>
-                  <Link to="/about" className="chrome-btn mt-5 text-sm">
-                    소개 보기 →
+                </section>
+
+                <section id="projects" className="crt-section crt-content-section crt-projects">
+                  <SectionHeading
+                    index="04"
+                    title="PROJECTS"
+                    subtitle="Selected moving-image work"
+                  />
+                  <div className="project-grid">
+                    {projectItems.map((project) => {
+                      const youtubeId = getYouTubeId(project);
+
+                      return youtubeId ? (
+                        <button
+                          key={project.number}
+                          type="button"
+                          className="project-card project-card-playable"
+                          onClick={() => {
+                            setSelectedProject(project);
+                            screenRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                        >
+                          <ProjectCardContent project={project} />
+                        </button>
+                      ) : (
+                        <article key={project.number} className="project-card">
+                          <ProjectCardContent project={project} comingSoon />
+                        </article>
+                      );
+                    })}
+                  </div>
+                  <Link to="/works" className="screen-button">
+                    OPEN ALL PROJECTS →
                   </Link>
-                </div>
-              </WindowFrame>
+                </section>
+
+                <section id="update-log" className="crt-section crt-content-section">
+                  <SectionHeading
+                    index="05"
+                    title="UPDATE LOG"
+                    subtitle="YULIN.ZIP / VERSION HISTORY"
+                  />
+                  <div className="update-window">
+                    <div className="update-titlebar">
+                      <span>CHANGELOG.TXT</span>
+                      <span>_ □ ×</span>
+                    </div>
+                    <ol>
+                      {updates.map(([date, title, description]) => (
+                        <li key={date}>
+                          <time>{date}</time>
+                          <div>
+                            <h3>{title}</h3>
+                            <p>{description}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </section>
+
+                <section id="contact" className="crt-section crt-content-section crt-contact">
+                  <SectionHeading index="06" title="CONTACT" subtitle="NEXT PROJECT / NEW SCENE" />
+                  <div className="contact-window">
+                    <p className="section-lead">함께 만들고 싶은 이야기가 있다면 연락해주세요.</p>
+                    <dl className="contact-list">
+                      <div>
+                        <dt>Email:</dt>
+                        <dd>
+                          <a href="mailto:dlgustj725@gmail.com">dlgustj725@gmail.com</a>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>GitHub:</dt>
+                        <dd>
+                          <a href="https://github.com/yulrin" target="_blank" rel="noreferrer">
+                            github.com/yulrin
+                          </a>
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Portfolio:</dt>
+                        <dd>
+                          <a href="https://yulrin-zip.vercel.app" target="_blank" rel="noreferrer">
+                            yulrin-zip.vercel.app
+                          </a>
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                  <p className="contact-status">● CONTACT CHANNEL OPEN · 2026</p>
+                </section>
+              </div>
+
+              <div className="crt-scanlines" aria-hidden="true" />
+              <div className="crt-noise" aria-hidden="true" />
+              <div className="crt-glass" aria-hidden="true" />
             </div>
 
-            {/* ===== CONTACT DIALOG ===== */}
-            <WindowFrame title="문의하기.exe — 새 메시지" variant="pink">
-              <div className="bg-white p-5 md:p-10 text-center">
-                <div className="sticker-pink mx-auto mb-3">⊹ 안내</div>
-                <h2 className="font-display text-4xl md:text-6xl leading-[0.95]">
-                  만들고 싶은 이야기가 있나요? <br />
-                  <span className="text-foreground">함께 영상으로 완성해요.</span>
-                </h2>
-                <p className="mt-3 font-mono text-base md:text-lg text-muted-foreground">
-                  2026년 브랜드 필름과 광고 프로젝트를 진행하고 있습니다.
-                </p>
-                <div className="mt-5 flex flex-wrap justify-center gap-3">
-                  <a href="mailto:hello@yulin.zip" className="chrome-btn-pink w-full sm:w-auto">
-                    ✉ 이메일로 문의하기
-                  </a>
-                  <Link to="/contact" className="chrome-btn w-full sm:w-auto">
-                    [ 확인 ] 프로젝트 상담하기
-                  </Link>
-                </div>
-              </div>
-              <div className="px-3 py-1 border-t-2 border-foreground bg-muted font-mono text-sm flex justify-between">
-                <span>24시간 내 답변드립니다</span>
-                <span className="blink">▮</span>
-              </div>
-            </WindowFrame>
-
-            {/* ===== TASKBAR ===== */}
-            <div className="win hidden sm:block" aria-hidden="true">
-              <div className="flex items-center gap-2 px-2 py-1 bg-gradient-to-b from-[oklch(0.95_0_0)] via-[oklch(0.82_0.01_250)] to-[oklch(0.6_0.01_250)] border-b-2 border-foreground">
-                <span className="chrome-btn-pink !min-h-0 !py-1 !px-3 text-xs">★ 시작</span>
-                <div className="flex-1 flex items-center gap-1 overflow-x-auto">
-                  {[
-                    "README.txt",
-                    "SHOWREEL_2026.MP4",
-                    "최근_프로젝트.exe",
-                    "제작과정.exe",
-                    "소개.txt",
-                    "문의하기.exe",
-                  ].map((t) => (
-                    <span
-                      key={t}
-                      className="font-pixel text-xs px-2 py-1 border-2 border-foreground bg-white rounded-sm whitespace-nowrap"
-                    >
-                      ▣ {t}
-                    </span>
-                  ))}
-                </div>
-                <span className="font-pixel text-xs px-2 py-1 border-2 border-foreground bg-white rounded-sm whitespace-nowrap">
-                  🕒 {clock}
-                </span>
-              </div>
+            <div className="crt-controls" aria-hidden="true">
+              <span className="crt-speaker" />
+              <span className="crt-control-label">TRINITRON COLOR</span>
+              <span className="crt-buttons">
+                <i />
+                <i />
+                <i />
+              </span>
+              <span className="crt-power">
+                <i /> POWER
+              </span>
             </div>
           </div>
         </div>
-      </PageShell>
+        <div className="crt-stand" aria-hidden="true">
+          <span />
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export function ProjectCardContent({
+  project,
+  comingSoon = false,
+}: {
+  project: PortfolioProject;
+  comingSoon?: boolean;
+}) {
+  return (
+    <>
+      <div className="project-image">
+        <img src={project.image} alt={`${project.title} 대표 장면`} loading="lazy" />
+        <span>FILE_{project.number}</span>
+        {comingSoon && <b className="coming-soon-badge">Coming Soon</b>}
+      </div>
+      <div className="project-meta">
+        <h3>
+          {project.number} {project.title}
+        </h3>
+        <p>Category: {project.category}</p>
+        <p className="project-description">{project.description}</p>
+      </div>
     </>
+  );
+}
+
+export function ProjectPlayer({
+  project,
+  onBack,
+}: {
+  project: PortfolioProject;
+  onBack: () => void;
+}) {
+  const youtubeId = getYouTubeId(project);
+  if (!youtubeId) return null;
+
+  const isPortrait = project.aspectRatio === "9:16";
+
+  return (
+    <div
+      className="project-player-view"
+      role="dialog"
+      aria-label={`${project.title} 영상 플레이어`}
+    >
+      <div className="project-player-bar">
+        <button type="button" onClick={onBack}>
+          ← Back to Projects
+        </button>
+        <span>
+          {project.number} / {project.title}
+        </span>
+      </div>
+      <div className="project-video-area">
+        <iframe
+          className={`youtube-embed ${isPortrait ? "is-portrait" : "is-landscape"}`}
+          src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=0&controls=1&rel=0`}
+          title={`${project.title} YouTube 영상`}
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    </div>
+  );
+}
+
+function SectionHeading({
+  index,
+  title,
+  subtitle,
+}: {
+  index: string;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <header className="section-heading">
+      <span>{index}</span>
+      <div>
+        <h2>{title}</h2>
+        <p>{subtitle}</p>
+      </div>
+    </header>
   );
 }
